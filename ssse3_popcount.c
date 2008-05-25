@@ -1,5 +1,5 @@
 /*
-	Bit population count, $Revision: 1.1 $
+	Bit population count, $Revision: 1.2 $
 
 	This program includes three functions:
 	* lookup  --- lookup based 
@@ -12,7 +12,7 @@
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-05-24 23:05:09 $
+	initial release 24-05-2008, last update $Date: 2008-05-25 14:44:29 $
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -185,18 +185,14 @@ uint32_t ssse3_popcount1(uint8_t* buffer, int chunks16) {
 			"psrlw         $4, %%xmm1	\n"
 			"pand      %%xmm6, %%xmm0	\n"	// xmm0 := lower nibbles
 			"pand      %%xmm6, %%xmm1	\n"	// xmm1 := higher nibbles
-			"movdqa    %%xmm1, %%xmm2	\n"
-			"punpcklbw %%xmm0, %%xmm1	\n"	// interleave nibbles
-			"punpckhbw %%xmm0, %%xmm2	\n"
-
-			"movdqa    %%xmm7, %%xmm0	\n"
+			"movdqa    %%xmm7, %%xmm2	\n"
 			"movdqa    %%xmm7, %%xmm3	\n"	// get popcount
-			"pshufb    %%xmm1, %%xmm0	\n"	// for all nibbles
-			"pshufb    %%xmm2, %%xmm3	\n"	// using PSHUFB
+			"pshufb    %%xmm0, %%xmm2	\n"	// for all nibbles
+			"pshufb    %%xmm1, %%xmm3	\n"	// using PSHUFB
 
-			"paddb     %%xmm3, %%xmm0	\n"	// popcount for all bytes
-			"pxor      %%xmm1, %%xmm1	\n"
-			"psadbw    %%xmm1, %%xmm0	\n"	// sum popcounts
+			"paddb     %%xmm2, %%xmm3	\n"	// popcount for all bytes
+			"pxor      %%xmm0, %%xmm0	\n"
+			"psadbw    %%xmm3, %%xmm0	\n"	// sum popcounts
 
 			"movhlps   %%xmm0, %%xmm1	\n"
 			"paddd     %%xmm0, %%xmm1	\n"
