@@ -1,5 +1,5 @@
 /*
-	Bit population count, $Revision: 1.2 $
+	Bit population count, $Revision: 1.3 $
 
 	This program includes three functions:
 	* lookup  --- lookup based 
@@ -12,11 +12,13 @@
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-05-25 14:44:29 $
+	initial release 24-05-2008, last update $Date: 2008-05-26 15:44:46 $
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <time.h>
 
 #ifdef ALIGN_DATA
 #	define __aligned__ __attribute__((aligned(16)))
@@ -121,9 +123,9 @@ uint32_t POPCOUNT_8bit[256] __aligned__ = {
 
 uint32_t c_popcount(uint8_t* buffer, int chunks16) {
 	uint32_t n = 0;
-	int i;
 
 #if 0
+	int i;
 	for (i=0; i < chunks16 * 16; i+=4) {
 		n += POPCOUNT_8bit[buffer[i+0]];
 		n += POPCOUNT_8bit[buffer[i+1]];
@@ -212,7 +214,7 @@ uint32_t ssse3_popcount1(uint8_t* buffer, int chunks16) {
 uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 	static char MASK_4bit[16] = {0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf};
 
-	uint32_t result, tmp;
+	uint32_t result;
 
 	asm volatile ("movdqu (%%eax), %%xmm7" : : "a" (POPCOUNT_4bit));
 	asm volatile ("movdqu (%%eax), %%xmm6" : : "a" (MASK_4bit));
