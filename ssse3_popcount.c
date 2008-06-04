@@ -1,5 +1,5 @@
 /*
-	Bit population count, $Revision: 1.3 $
+	Bit population count, $Revision: 1.4 $
 
 	This program includes three functions:
 	* lookup  --- lookup based 
@@ -12,12 +12,13 @@
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-05-26 15:44:46 $
+	initial release 24-05-2008, last update $Date: 2008-06-04 12:45:02 $
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 
 #ifdef ALIGN_DATA
@@ -133,7 +134,7 @@ uint32_t c_popcount(uint8_t* buffer, int chunks16) {
 		n += POPCOUNT_8bit[buffer[i+3]];
 	}
 #endif
-	asm volatile (
+	__asm__ volatile (
 		"	xor %%eax, %%eax		\n"
 		"0:					\n"
 		"	movl (%%esi), %%ebx		\n"
@@ -171,12 +172,12 @@ uint32_t ssse3_popcount1(uint8_t* buffer, int chunks16) {
 	uint32_t result, tmp;
 	int n;
 
-	asm volatile ("movdqu (%%eax), %%xmm7" : : "a" (POPCOUNT_4bit));
-	asm volatile ("movdqu (%%eax), %%xmm6" : : "a" (MASK_4bit));
+	__asm__ volatile ("movdqu (%%eax), %%xmm7" : : "a" (POPCOUNT_4bit));
+	__asm__ volatile ("movdqu (%%eax), %%xmm6" : : "a" (MASK_4bit));
 
 	result = 0;
 	for (n=0; n < chunks16; n++) {
-		asm volatile(
+		__asm__ volatile(
 #if ALIGN_DATA
 			"movdqa	  (%%ebx), %%xmm0	\n"
 #else
@@ -216,9 +217,9 @@ uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 
 	uint32_t result;
 
-	asm volatile ("movdqu (%%eax), %%xmm7" : : "a" (POPCOUNT_4bit));
-	asm volatile ("movdqu (%%eax), %%xmm6" : : "a" (MASK_4bit));
-	asm volatile ("pxor    %%xmm5, %%xmm5" : : ); // xmm5 -- global accumulator
+	__asm__ volatile ("movdqu (%%eax), %%xmm7" : : "a" (POPCOUNT_4bit));
+	__asm__ volatile ("movdqu (%%eax), %%xmm6" : : "a" (MASK_4bit));
+	__asm__ volatile ("pxor    %%xmm5, %%xmm5" : : ); // xmm5 -- global accumulator
 
 	result = 0;
 
@@ -237,9 +238,9 @@ uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 			chunks16 = 0;
 		}
 
-		asm volatile ("pxor %xmm4, %xmm4"); // xmm4 -- local accumulator
+		__asm__ volatile ("pxor %xmm4, %xmm4"); // xmm4 -- local accumulator
 		for (n=0; n < k; n++) {
-			asm volatile(
+			__asm__ volatile(
 #if ALIGN_DATA
 				"movdqa	  (%%eax), %%xmm0	\n"
 #else
@@ -266,7 +267,7 @@ uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 		}
 
 		// update global accumulator (two 32-bits counters)
-		asm volatile (
+		__asm__ volatile (
 			"pxor	%xmm0, %xmm0		\n"
 			"psadbw	%xmm0, %xmm4		\n"
 			"paddd	%xmm4, %xmm5		\n"
@@ -274,7 +275,7 @@ uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 	}
 
 	// finally add together 32-bits counters stored in global accumulator
-	asm volatile (
+	__asm__ volatile (
 		"movhlps   %%xmm5, %%xmm0	\n"
 		"paddd     %%xmm5, %%xmm0	\n"
 		"movd      %%xmm0, %%eax	\n"
