@@ -1,10 +1,14 @@
 /*
-	Bit population count, $Revision: 1.5 $
+	Bit population count, $Revision: 1.6 $
 
 	This program includes three functions:
 	* lookup  --- lookup based 
 	* ssse3-1 --- SSSE3 using PSHUFB and PSADB
 	* ssse3-2 --- improved SSSE3 procedure
+	
+	
+	compilation:
+	$ gcc -O3 -Wall -pedantic -std=c99 ssse3_popcount.c
 	
 	Author: Wojciech Mu³a
 	e-mail: wojciech_mula@poczta.onet.pl
@@ -12,7 +16,7 @@
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-06-08 18:55:04 $
+	initial release 24-05-2008, last update $Date: 2008-06-08 18:56:13 $
 */
 #include <stdio.h>
 #include <stdlib.h>
