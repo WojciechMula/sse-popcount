@@ -1,5 +1,5 @@
 /*
-	Bit population count, $Revision: 1.6 $
+	Bit population count, $Revision: 1.7 $
 
 	This program includes three functions:
 	* lookup  --- lookup based 
@@ -12,11 +12,11 @@
 	
 	Author: Wojciech Mu³a
 	e-mail: wojciech_mula@poczta.onet.pl
-	www:    http://www.mula.w.pl
+	www:    http://www.republika.pl/wmula/
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-06-08 18:56:13 $
+	initial release 24-05-2008, last update $Date: 2008-06-08 23:00:44 $
 */
 #include <stdio.h>
 #include <stdlib.h>
