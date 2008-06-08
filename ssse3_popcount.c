@@ -1,5 +1,5 @@
 /*
-	Bit population count, $Revision: 1.4 $
+	Bit population count, $Revision: 1.5 $
 
 	This program includes three functions:
 	* lookup  --- lookup based 
@@ -12,7 +12,7 @@
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-06-04 12:45:02 $
+	initial release 24-05-2008, last update $Date: 2008-06-08 18:55:04 $
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -123,6 +123,7 @@ uint32_t POPCOUNT_8bit[256] __aligned__ = {
 };
 
 uint32_t c_popcount(uint8_t* buffer, int chunks16) {
+	uint32_t dummy __attribute__((unused));
 	uint32_t n = 0;
 
 #if 0
@@ -155,7 +156,9 @@ uint32_t c_popcount(uint8_t* buffer, int chunks16) {
 		"					\n"
 		"	test  %%ecx, %%ecx		\n"
 		"	jnz   0b			\n"
-		: "=a" (n)
+		: "=a" (n),
+		  "=S" (dummy),
+		  "=c" (dummy)
 		: "c" (chunks16 * 16 / 4),
 		  "S" (buffer)
 		: "ebx", "edx", "edi"
@@ -167,6 +170,7 @@ uint32_t c_popcount(uint8_t* buffer, int chunks16) {
 
 // ---- SSSE3 - naive approach --------------------------------------------
 uint32_t ssse3_popcount1(uint8_t* buffer, int chunks16) {
+	uint32_t dummy __attribute__((unused));
 	static char MASK_4bit[16] = {0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf};
 
 	uint32_t result, tmp;
@@ -211,7 +215,7 @@ uint32_t ssse3_popcount1(uint8_t* buffer, int chunks16) {
 }
 
 
-// ---- SSSE3 - better alorithm, minimzed psadbw usage --------------------
+// ---- SSSE3 - better alorithm, minimized psadbw usage -------------------
 uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 	static char MASK_4bit[16] = {0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf};
 
@@ -288,7 +292,7 @@ uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 
 #define OPT_COUNT 4
 
-char* functions[4] = {"verify", "lookup", "ssse3-1", "ssse3-2"};
+char* functions[OPT_COUNT] = {"verify", "lookup", "ssse3-1", "ssse3-2"};
 
 
 void help(const char* progname) {
