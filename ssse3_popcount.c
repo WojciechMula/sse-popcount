@@ -1,18 +1,20 @@
 /*
-	Bit population count, $Revision: 1.7 $
+	Bit population count, $Revision$
 
 	This program includes three functions:
 	* lookup  --- lookup based 
-	* ssse3-1 --- SSSE3 using PSHUFB and PSADB
-	* ssse3-2 --- improved SSSE3 procedure
-	
+	* ssse3-1 --- SSSE3 using PSHUFB and PSADBW
+	* ssse3-2 --- improved SSSE3 procedure - PSADBW called fewer times
+	* sse2-1  --- bit-parallel counting and PSADBW
+	* sse2-2  --- bit-parallel counting - PSADBW called fewer times (the same
+	              optimization as in ssse3-2)
 	
 	compilation:
 	$ gcc -O3 -Wall -pedantic -std=c99 ssse3_popcount.c
 	
 	Author: Wojciech Mu³a
 	e-mail: wojciech_mula@poczta.onet.pl
-	www:    http://www.republika.pl/wmula/
+	www:    http://wm.ite.pl/
 	
 	License: BSD
 	
@@ -171,6 +173,140 @@ uint32_t c_popcount(uint8_t* buffer, int chunks16) {
 	return n;
 }
 
+// ---- SSE2 - naive approach ---------------------------------------------
+uint32_t sse2_popcount1(uint8_t* buffer, int chunks16) {
+	static uint8_t mask33[16] = {0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33}; 
+	static uint8_t mask55[16] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55}; 
+	static uint8_t mask0f[16] = {0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f}; 
+
+	uint32_t result = 0;
+	uint32_t tmp;
+	int n;
+
+	__asm__ volatile ("movdqu (%%eax), %%xmm5" : : "a" (mask55));
+	__asm__ volatile ("movdqu (%%eax), %%xmm6" : : "a" (mask33));
+	__asm__ volatile ("movdqu (%%eax), %%xmm7" : : "a" (mask0f));
+
+	for (n=0; n < chunks16; n++) {
+		__asm__ volatile(
+#if ALIGN_DATA
+			"movdqa	  (%%ebx), %%xmm0	\n"
+#else
+			"movdqu	  (%%ebx), %%xmm0	\n"
+#endif
+			"movdqa    %%xmm0, %%xmm1	\n"
+			"psrlw         $1, %%xmm1	\n"
+			"pand      %%xmm5, %%xmm0	\n"
+			"pand      %%xmm5, %%xmm1	\n"
+			"paddb     %%xmm1, %%xmm0	\n"
+
+			"movdqa    %%xmm0, %%xmm1	\n"
+			"psrlw         $2, %%xmm1	\n"
+			"pand      %%xmm6, %%xmm0	\n"
+			"pand      %%xmm6, %%xmm1	\n"
+			"paddb     %%xmm1, %%xmm0	\n"
+
+			"movdqa    %%xmm0, %%xmm1	\n"
+			"psrlw         $4, %%xmm1	\n"
+			"pand      %%xmm7, %%xmm0	\n"
+			"pand      %%xmm7, %%xmm1	\n"
+			"paddb     %%xmm1, %%xmm0	\n"
+
+			"pxor      %%xmm1, %%xmm1	\n"	// popcount for all bytes
+			"psadbw    %%xmm1, %%xmm0	\n"	// sum popcounts
+
+			"movhlps   %%xmm0, %%xmm1	\n"
+			"paddd     %%xmm0, %%xmm1	\n"
+			"movd      %%xmm1, %%eax	\n"
+
+			: "=a" (tmp)
+			: "b" (&buffer[n*16])
+		);
+		result += tmp;
+	}
+
+	return result;
+}
+
+// ---- SSE2 - naive approach improved ------------------------------------
+uint32_t sse2_popcount2(uint8_t* buffer, int chunks16) {
+	static uint8_t mask33[16] = {0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33}; 
+	static uint8_t mask55[16] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55}; 
+	static uint8_t mask0f[16] = {0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f}; 
+
+	uint32_t result = 0;
+	int i, n, k;
+
+	__asm__ volatile ("movdqu (%%eax), %%xmm5" : : "a" (mask55));
+	__asm__ volatile ("movdqu (%%eax), %%xmm6" : : "a" (mask33));
+	__asm__ volatile ("movdqu (%%eax), %%xmm7" : : "a" (mask0f));
+	__asm__ volatile ("pxor %xmm4, %xmm4");	// global accumulator
+
+	i = 0;
+	while (chunks16 > 0) {
+		// max(POPCOUNT_8bit) = 8, thus byte-wise addition could be done
+		// for floor(255/8) = 31 iterations
+		if (chunks16 > 31) {
+			k = 31;
+			chunks16 -= 31;
+		}
+		else {
+			k = chunks16;
+			chunks16 = 0;
+		}
+
+		__asm__ volatile ("pxor %xmm3, %xmm3"); // xmm3 -- local accumulator
+		for (n=0; n < k; n++) {
+			__asm__ volatile(
+#if ALIGN_DATA
+				"movdqa	  (%%eax), %%xmm0	\n"
+#else
+				"movdqu	  (%%eax), %%xmm0	\n"
+#endif
+				"movdqa    %%xmm0, %%xmm1	\n"
+				"psrlw         $1, %%xmm1	\n"
+				"pand      %%xmm5, %%xmm0	\n"
+				"pand      %%xmm5, %%xmm1	\n"
+				"paddb     %%xmm1, %%xmm0	\n"
+
+				"movdqa    %%xmm0, %%xmm1	\n"
+				"psrlw         $2, %%xmm1	\n"
+				"pand      %%xmm6, %%xmm0	\n"
+				"pand      %%xmm6, %%xmm1	\n"
+				"paddb     %%xmm1, %%xmm0	\n"
+
+				"movdqa    %%xmm0, %%xmm1	\n"
+				"psrlw         $4, %%xmm1	\n"
+				"pand      %%xmm7, %%xmm0	\n"
+				"pand      %%xmm7, %%xmm1	\n"
+				"paddb     %%xmm1, %%xmm0	\n"
+
+				"paddb     %%xmm0, %%xmm3	\n"	// update local accumulator
+
+				: 
+				: "a" (&buffer[i])
+			);
+			i += 16;
+		}
+
+		// update global accumulator (two 32-bits counters)
+		__asm__ volatile (
+			"pxor	%xmm0, %xmm0		\n"
+			"psadbw	%xmm0, %xmm3		\n"
+			"paddd	%xmm3, %xmm4		\n"
+		);
+	}
+
+	// finally add together 32-bits counters stored in global accumulator
+	__asm__ volatile (
+		"movhlps   %%xmm4, %%xmm0	\n"
+		"paddd     %%xmm4, %%xmm0	\n"
+		"movd      %%xmm0, %%eax	\n"
+		: "=a" (result)
+	);
+
+	return result;
+}
 
 // ---- SSSE3 - naive approach --------------------------------------------
 uint32_t ssse3_popcount1(uint8_t* buffer, int chunks16) {
@@ -294,9 +430,9 @@ uint32_t ssse3_popcount2(uint8_t* buffer, int chunks16) {
 }
 
 
-#define OPT_COUNT 4
+#define OPT_COUNT 6
 
-char* functions[OPT_COUNT] = {"verify", "lookup", "ssse3-1", "ssse3-2"};
+char* functions[OPT_COUNT] = {"verify", "lookup", "sse2-1", "sse2-2", "ssse3-1", "ssse3-2"};
 
 
 void help(const char* progname) {
@@ -362,28 +498,32 @@ int main(int argc, char* argv[]) {
 	printf("action=%s, chunks=%d, repeat count=%d\n",
 		functions[function], chunks_count, repeat_count);
 
-	uint32_t popcount1, popcount2, popcount3;
+	uint32_t popcount_ref, popcount;
+	char failed = 0;
 	switch (function) {
 		case 0:
-			popcount1 = c_popcount(buffer, chunks_count);
-			popcount2 = ssse3_popcount1(buffer, chunks_count);
-			popcount3 = ssse3_popcount2(buffer, chunks_count);
+			popcount_ref = c_popcount(buffer, chunks_count);
 
-			printf("%10s -> %d\n", functions[1], popcount1);// lookup result is reference
-			printf("%10s -> %d %s\n",
-				functions[2],
-				popcount2,
-				(popcount1 != popcount2) ? "FAILED!!!" : ""
-			);
-			
-			printf("%10s -> %d %s\n",
-				functions[3],
-				popcount3,
-				(popcount1 != popcount3) ? "FAILED!!!" : ""
-			);
+			// lookup result is reference
+			printf("%10s -> %d\n", functions[1], popcount_ref);
 
-			if (popcount1 != popcount2 || popcount1 != popcount3)
-				return 1;
+#define verify(index, function) \
+			popcount = function(buffer, chunks_count); \
+			printf("%10s -> %d %s\n", \
+				functions[index], \
+				popcount, \
+				(popcount_ref != popcount) ? "FAILED!!!" : "" \
+			); \
+			if (popcount_ref != popcount) \
+				failed = 1;
+
+			verify(2, sse2_popcount1);
+			verify(3, sse2_popcount2);
+			verify(4, ssse3_popcount1);
+			verify(5, ssse3_popcount2);
+
+			if (failed)
+				return EXIT_FAILURE;
 
 			break;
 
@@ -394,16 +534,26 @@ int main(int argc, char* argv[]) {
 
 		case 2:
 			while (repeat_count--)
-				ssse3_popcount1(buffer, chunks_count);
+				sse2_popcount1(buffer, chunks_count);
 			break;
 
 		case 3:
+			while (repeat_count--)
+				sse2_popcount2(buffer, chunks_count);
+			break;
+
+		case 4:
+			while (repeat_count--)
+				ssse3_popcount1(buffer, chunks_count);
+			break;
+
+		case 5:
 			while (repeat_count--)
 				ssse3_popcount2(buffer, chunks_count);
 			break;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 // eof
