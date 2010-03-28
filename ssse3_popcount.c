@@ -18,7 +18,7 @@
 	
 	License: BSD
 	
-	initial release 24-05-2008, last update $Date: 2008-06-08 23:00:44 $
+	initial release 24-05-2008, last update $Date$
 */
 #include <stdio.h>
 #include <stdlib.h>
