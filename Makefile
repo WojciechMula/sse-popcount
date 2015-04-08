@@ -1,7 +1,7 @@
 CC=g++
-FLAGS=-std=c++11 -mssse3 -O2 -Wall -pedantic -Wextra
+FLAGS=-std=c++11 -mssse3 -mpopcnt -O2 -Wall -pedantic -Wextra
 
-DEPS=popcnt-*.cpp
+DEPS=popcnt-*.cpp config.h
 ALL=speed verify
 
 .PHONY: all
@@ -9,10 +9,10 @@ ALL=speed verify
 all: $(ALL)
 
 speed: $(DEPS) speed.cpp
-	$(CC) $(FLAGS) speed.cpp -o speed
+	$(CC) $(FLAGS) speed.cpp -o $@
 
 verify: $(DEPS) verify.cpp
-	$(CC) $(FLAGS) verify.cpp -o verify
+	$(CC) $(FLAGS) verify.cpp -o $@
 
 run: speed
 	sh run.sh speed

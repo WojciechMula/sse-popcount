@@ -1,8 +1,10 @@
+#include "config.h"
+
 #include <immintrin.h>
+#include <x86intrin.h>
 
 #include <cstdint>
 #include <cstdlib>
-
 #include <string>
 
 // --------------------------------------------------
@@ -13,6 +15,7 @@
 #include "sse_operators.cpp"
 #include "popcnt-sse-bit-parallel.cpp"
 #include "popcnt-sse-lookup.cpp"
+#include "popcnt-cpu.cpp"
 
 // --------------------------------------------------
 
@@ -30,7 +33,10 @@ function_t functions[] = {
     {false, "bit-parallel",            popcnt_parallel_64bit_naive},
     {false, "bit-parallel-optimized",  popcnt_parallel_64bit_optimized},
     {false, "sse-bit-parallel",        popcnt_SSE_bit_parallel},
-    {false, "sse-lookup",              popcnt_SSE_lookup} 
+    {false, "sse-lookup",              popcnt_SSE_lookup},
+#ifdef HAVE_POPCNT_INSTRUCTION
+    {false, "cpu",                     popcnt_SSE_lookup} 
+#endif
 };
 
 
@@ -66,10 +72,19 @@ int main() {
         data[i] = i*33 + 12345;
     }
 
-    verify("descending", data, size);
+    verify("quasirandom", data, size);
 
     return EXIT_SUCCESS;
 }
+
+
+void puts(const char* str, int ansi_color) {
+    printf("\033[%dm%s\033[0m\n", ansi_color, str);
+}
+
+
+static const int RED   = 31;
+static const int GREEN = 32;
 
 
 void verify(const char* name, const std::uint8_t* data, const size_t size) {
@@ -87,6 +102,10 @@ void verify(const char* name, const std::uint8_t* data, const size_t size) {
         printf("%-30s: ", item.name);
         const size_t result = item.function(data, size);
 
-        printf("%s\n", (result == reference) ? "OK" : "!!!error!!!");
+        if (result == reference) {
+            puts("OK", GREEN);
+        } else {
+            puts("ERROR", RED);
+        }
     }
 }
