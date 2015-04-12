@@ -42,9 +42,10 @@ There are following procedures:
 
 Results from core i5, program compiled by GCC 4.9.2::
 
-    running lookup-8                      time =   0.676886 s
-    running lookup-64                     time =   0.672696 s
-    running bit-parallel                  time =   0.685250 s
-    running bit-parallel-optimized        time =   0.451518 s
-    running sse-bit-parallel              time =   0.210530 s
-    running sse-lookup                    time =   0.140623 s
+    running cpu                           time = 0.127574 s
+    running sse-lookup                    time = 0.147006 s
+    running sse-bit-parallel              time = 0.208366 s
+    running bit-parallel-optimized        time = 0.447463 s
+    running bit-parallel                  time = 0.683336 s
+    running lookup-8                      time = 0.668823 s
+    running lookup-64                     time = 0.687057 s

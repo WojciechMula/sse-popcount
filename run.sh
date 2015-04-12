@@ -1,6 +1,6 @@
 size=1000000
 iter=1000
-names="cpu lookup-8 lookup-64 bit-parallel bit-parallel-optimized sse-bit-parallel sse-lookup"
+names="cpu sse-lookup sse-bit-parallel bit-parallel-optimized bit-parallel lookup-8 lookup-64"
 
 for name in $names
 do

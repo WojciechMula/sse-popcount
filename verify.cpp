@@ -9,6 +9,10 @@
 
 // --------------------------------------------------
 
+#include "config.h"
+
+// --------------------------------------------------
+
 #include "popcnt-lookup.cpp"
 #include "popcnt-bit-parallel-scalar.cpp"
 
@@ -78,9 +82,15 @@ int main() {
 }
 
 
+#if HAVE_ANSI_CONSOLE
 void puts(const char* str, int ansi_color) {
     printf("\033[%dm%s\033[0m\n", ansi_color, str);
 }
+#else
+void puts(const char* str, int) {
+    puts(str);
+}
+#endif // HAVE_ANSI_CONSOLE
 
 
 static const int RED   = 31;
