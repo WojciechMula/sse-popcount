@@ -140,8 +140,16 @@ std::uint64_t popcnt_lookup_8bit(const uint8_t* data, const size_t n) {
     
     size_t result = 0;
 
-    for (size_t i=0; i < n; i++) {
-        result += lookup8bit[data[i]];
+    size_t i = 0;
+    while (i + 4 <= n) {
+        result += lookup8bit[data[i]]; i++;
+        result += lookup8bit[data[i]]; i++;
+        result += lookup8bit[data[i]]; i++;
+        result += lookup8bit[data[i]]; i++;
+    }
+
+    while (i < n) {
+        result += lookup8bit[data[i]]; i++;
     }
 
     return result;
@@ -152,8 +160,16 @@ std::uint64_t popcnt_lookup_64bit(const uint8_t* data, const size_t n) {
     
     size_t result = 0;
 
-    for (size_t i=0; i < n; i++) {
-        result += lookup64bit[data[i]];
+    size_t i = 0;
+    while (i + 4 <= n) {
+        result += lookup64bit[data[i]]; i++;
+        result += lookup64bit[data[i]]; i++;
+        result += lookup64bit[data[i]]; i++;
+        result += lookup64bit[data[i]]; i++;
+    }
+
+    while (i < n) {
+        result += lookup64bit[data[i]]; i++;
     }
 
     return result;
