@@ -23,11 +23,14 @@ speed_avx2: $(DEPS) speed.cpp
 verify_avx2: $(DEPS) verify.cpp
 	$(CC) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS verify.cpp -o $@
 
+SIZE=10000000
+ITERS=1000
+
 run: speed
-	sh run.sh speed
+	./speed $(SIZE) $(ITERS)
 
 run_avx2: speed_avx2
-	sh run.sh speed_avx2
+	./speed_avx2 $(SIZE) $(ITERS)
 
 clean:
 	rm -f $(ALL) $(ALL_AVX2)
