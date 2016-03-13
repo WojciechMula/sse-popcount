@@ -15,6 +15,7 @@
 
 #include "popcnt-lookup.cpp"
 #include "popcnt-bit-parallel-scalar.cpp"
+#include "popcnt-harley-seal.cpp"
 
 #include "sse_operators.cpp"
 #include "popcnt-sse-bit-parallel.cpp"
@@ -157,6 +158,15 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    if (functions.empty() || functions.count("harley-seal")) {
+
+        auto result = run(popcnt_harley_seal, "harley-seal", data, size, count, time);
+        n += result.count;
+        if (time == 0.0) {
+            time = result.time;
+        }
+    }
+
     if (functions.empty() || functions.count("sse-bit-parallel")) {
 
         auto result = run(popcnt_SSE_bit_parallel, "bit parallel optimized - SSE", data, size, count, time);
@@ -219,6 +229,7 @@ void print_help(const char* name) {
     std::puts("   * lookup-64               - lookup in std::uint64_t[256] LUT");
     std::puts("   * bit-parallel            - naive bit parallel method");
     std::puts("   * bit-parallel-optimized  - a bit better bit parallel");
+    std::puts("   * harley-seal             - Harley-Seal popcount (4th iteration)");
     std::puts("   * sse-bit-parallel        - SSE implementation of bit-parallel-optimized");
 #if defined(HAVE_POPCNT_INSTRUCTION)
     std::puts("   * cpu                     - CPU instruction popcnt (64-bit variant)");
@@ -232,6 +243,7 @@ bool is_name_valid(const std::string& name) {
         || (name == "lookup-64")
         || (name == "bit-parallel")
         || (name == "bit-parallel-optimized")
+        || (name == "harley-seal")
         || (name == "sse-bit-parallel")
         || (name == "sse-lookup")
 #if defined(HAVE_AVX2_INSTRUCTIONS)
