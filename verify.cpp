@@ -15,6 +15,7 @@
 
 #include "popcnt-lookup.cpp"
 #include "popcnt-bit-parallel-scalar.cpp"
+#include "popcnt-harley-seal.cpp"
 
 #include "sse_operators.cpp"
 #include "popcnt-sse-bit-parallel.cpp"
@@ -39,6 +40,7 @@ function_t functions[] = {
     {true,  "lookup-64",               popcnt_lookup_64bit},
     {false, "bit-parallel",            popcnt_parallel_64bit_naive},
     {false, "bit-parallel-optimized",  popcnt_parallel_64bit_optimized},
+    {false, "harley-seal",             popcnt_harley_seal},
     {false, "sse-bit-parallel",        popcnt_SSE_bit_parallel},
     {false, "sse-lookup",              popcnt_SSE_lookup},
 #if defined(HAVE_AVX2_INSTRUCTIONS)
