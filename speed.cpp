@@ -21,6 +21,10 @@
 
 #include "popcnt-cpu.cpp"
 
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+#   include "popcnt-avx2-lookup.cpp"
+#endif
+
 // --------------------------------------------------
 
 
@@ -112,6 +116,11 @@ int main(int argc, char* argv[]) {
         while (k-- > 0) {
             n += popcnt_SSE_lookup(data, size);
         }
+    } else if (name == "avx2-lookup") {
+
+        while (k-- > 0) {
+            n += popcnt_AVX2_lookup(data, size);
+        }
     } else if (name == "cpu") {
 
         while (k-- > 0) {
@@ -138,12 +147,15 @@ void print_help(const char* name) {
     std::puts("");
     std::puts("1. function - one of:");
     std::puts("   * sse-lookup              - SSSE3 variant using pshufb instruction");
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+    std::puts("   * avx2-lookup             - AVX2 variant using pshufb instruction");
+#endif
     std::puts("   * lookup-8                - lookup in std::uint8_t[256] LUT");
     std::puts("   * lookup-64               - lookup in std::uint64_t[256] LUT");
     std::puts("   * bit-parallel            - naive bit parallel method");
     std::puts("   * bit-parallel-optimized  - a bit better bit parallel");
     std::puts("   * sse-bit-parallel        - SSE implementation of bit-parallel-optimized");
-#ifdef HAVE_POPCNT_INSTRUCTION
+#if defined(HAVE_POPCNT_INSTRUCTION)
     std::puts("   * cpu                     - CPU instruction popcnt (64-bit variant)");
 #endif
     std::puts("2. size - size of buffer in 16-bytes chunks");
@@ -159,7 +171,10 @@ bool is_name_valid(const std::string& name) {
         || (name == "bit-parallel-optimized")
         || (name == "sse-bit-parallel")
         || (name == "sse-lookup")
-#ifdef HAVE_POPCNT_INSTRUCTION
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+        || (name == "avx2-lookup")
+#endif
+#if defined(HAVE_POPCNT_INSTRUCTION)
         || (name == "cpu")
 #endif
         ;

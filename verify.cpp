@@ -20,6 +20,9 @@
 #include "popcnt-sse-bit-parallel.cpp"
 #include "popcnt-sse-lookup.cpp"
 #include "popcnt-cpu.cpp"
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+#   include "popcnt-avx2-lookup.cpp"
+#endif
 
 // --------------------------------------------------
 
@@ -38,9 +41,13 @@ function_t functions[] = {
     {false, "bit-parallel-optimized",  popcnt_parallel_64bit_optimized},
     {false, "sse-bit-parallel",        popcnt_SSE_bit_parallel},
     {false, "sse-lookup",              popcnt_SSE_lookup},
-#ifdef HAVE_POPCNT_INSTRUCTION
-    {false, "cpu",                     popcnt_SSE_lookup} 
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+    {false, "avx2-lookup",             popcnt_AVX2_lookup},
 #endif
+#if defined(HAVE_POPCNT_INSTRUCTION)
+    {false, "cpu",                     popcnt_SSE_lookup},
+#endif
+    {false, nullptr, nullptr}
 };
 
 
@@ -105,6 +112,10 @@ void verify(const char* name, const std::uint8_t* data, const size_t size) {
     const size_t reference = popcnt_lookup_8bit(data, size);
 
     for (auto& item: functions) {
+        if (item.function == nullptr) {
+            continue;
+        }
+
         if (item.is_reference) {
             continue;
         }
