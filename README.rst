@@ -4,6 +4,7 @@
 
 Sample programs for my article http://0x80.pl/articles/sse-popcount.html
 
+
 Introduction
 ------------------------------------------------------------------------
 
@@ -13,39 +14,29 @@ written with intrinsics and tested on 64-bit machine.
 
 As usual type ``make`` to compile programs, then you can invoke:
 
-* ``verify`` --- program tests if all non-lookup implementations counts
-  bits properly.
-* ``speed`` --- program tests different implementations of popcount
-  procedure; please read help to find all options (run the program
-  without arguments).
+* ``verify``/``verify_avx2`` --- program tests if all non-lookup
+  implementations counts bits properly.
+* ``speed``/``speed_avx2`` --- program tests different implementations
+  of popcount procedure; please read help to find all options
+  (run the program without arguments).
 
-You can also run ``make run`` to run ``speed`` for all available
-implementations.
+You can also run ``make run`` and ``make run_avx2`` to run ``speed``
+for all available implementations.
 
 
-Available implementations in new version
+Available implementations in the new version
 ------------------------------------------------------------------------
 
-There are following procedures:
-
-* ``sse-lookup`` --- pshufb version described in the article.
+* ``sse-lookup`` --- SSE pshufb version described in the article.
+* ``avx2-lookup`` --- AVX2 pshufb version described in the article.
 * ``lookup-8`` --- lookup table of type ``std::uint8_t[256]``.
-* ``lookup-64`` --- lookup table of type ``std::uint64_t[256]``,
+* ``lookup-64`` --- lookup table of type ``std::uint64_t[256]``.
   LUT is 8 times larger, but we avoid extending 8 to 64 bits.
 * ``bit-parallel`` --- well know bit parallel method.
 * ``bit-parallel-optimized`` --- in this variant counting
   on packed bytes is performed exactly in the same way
   as described in the article: this gives **50% speedup**.
 * ``sse-bit-parallel`` --- SSE implementation of
-  ``bit-parallel-optimized``
+  ``bit-parallel-optimized``.
+* ``cpu`` --- use ``popcnt`` instructions
 
-
-Results from core i5, program compiled by GCC 4.9.2::
-
-    running cpu                           time = 0.127574 s
-    running sse-lookup                    time = 0.147006 s
-    running sse-bit-parallel              time = 0.208366 s
-    running bit-parallel-optimized        time = 0.447463 s
-    running bit-parallel                  time = 0.683336 s
-    running lookup-8                      time = 0.668823 s
-    running lookup-64                     time = 0.687057 s
