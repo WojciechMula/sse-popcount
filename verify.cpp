@@ -45,7 +45,7 @@ function_t functions[] = {
     {false, "avx2-lookup",             popcnt_AVX2_lookup},
 #endif
 #if defined(HAVE_POPCNT_INSTRUCTION)
-    {false, "cpu",                     popcnt_SSE_lookup},
+    {false, "cpu",                     popcnt_cpu_64bit},
 #endif
     {false, nullptr, nullptr}
 };
