@@ -51,7 +51,7 @@ class CommandLine final {
 public:
     bool    print_help;
     bool    print_csv;
-    size_t  chunks_count;
+    size_t  size;
     size_t  iteration_count;
     std::string executable;
     std::vector<std::string> functions;
@@ -72,7 +72,7 @@ private:
 CommandLine::CommandLine(int argc, char* argv[])
     : print_help(false)
     , print_csv(false)
-    , chunks_count(0)
+    , size(0)
     , iteration_count(0) {
 
     setup_functions();
@@ -98,7 +98,7 @@ CommandLine::CommandLine(int argc, char* argv[])
                 throw Error("Size must be greater than 0.");
             }
 
-            chunks_count = tmp;
+            size = tmp;
 
         } else if (positional == 1) {
 
@@ -158,7 +158,6 @@ bool CommandLine::is_name_valid(const std::string& name) {
 class Application final {
 
     const CommandLine& cmd;
-    size_t size;
     std::unique_ptr<uint8_t[]> data;
 
     uint64_t count;
@@ -186,8 +185,7 @@ private:
 
 
 Application::Application(const CommandLine& cmdline)
-    : cmd(cmdline)
-    , size(cmdline.chunks_count * 16) {}
+    : cmd(cmdline) {}
 
 
 int Application::run() {
@@ -203,11 +201,14 @@ int Application::run() {
 
 void Application::run_procedures() {
 
-    data.reset(new uint8_t[size]);
+    data.reset(new uint8_t[cmd.size]);
 
-    for (size_t i=0; i < size; i++) {
+    for (size_t i=0; i < cmd.size; i++) {
         data[i] = i;
     }
+
+    count = 0;
+    time  = 0;
 
     if (!cmd.functions.empty()) {
         for (const auto& name: cmd.functions) {
@@ -315,7 +316,7 @@ Application::Result Application::run(const std::string& name, FN function, doubl
     Result result;
 
     if (cmd.print_csv) {
-        printf("%s, %lu, %lu, ", name.c_str(), cmd.chunks_count, cmd.iteration_count);
+        printf("%s, %lu, %lu, ", name.c_str(), cmd.size, cmd.iteration_count);
         fflush(stdout);
     } else {
         printf("%-30s... ", cmd.descriptions.find(name)->second.c_str());
@@ -327,7 +328,7 @@ Application::Result Application::run(const std::string& name, FN function, doubl
 
     const auto t1 = std::chrono::high_resolution_clock::now();
     while (k-- > 0) {
-        n += function(data.get(), size);
+        n += function(data.get(), cmd.size);
     }
 
     const auto t2 = std::chrono::high_resolution_clock::now();
@@ -361,7 +362,7 @@ void Application::print_help() {
     std::puts("--csv               - print results in CVS format:");
     std::puts("                      function name, buffer_size, iteration_count, time");
     std::puts("");
-    std::puts("1. buffer_size      - size of buffer in 16-bytes chunks");
+    std::puts("1. buffer_size      - size of buffer in bytes");
     std::puts("2. iteration_count  - as the name states");
 
     std::puts("3. one or more functions (if not given all will run):");
