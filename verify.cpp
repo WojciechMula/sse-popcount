@@ -68,7 +68,7 @@ int main() {
 
     // 2. all ones
     for (size_t i=0; i < size; i++) {
-        data[i] = 0;
+        data[i] = 1;
     }
 
     verify("all ones", data, size);
