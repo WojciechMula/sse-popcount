@@ -7,7 +7,9 @@
 #include <cstdlib>
 #include <cassert>
 
-#include <set>
+#include <memory>
+#include <map>
+#include <vector>
 #include <string>
 #include <chrono>
 
@@ -30,166 +32,264 @@
 // --------------------------------------------------
 
 
-void print_help(const char* name);
-bool is_name_valid(const std::string& name);
+class Error final {
+    std::string message;
 
+public:
+    Error(const std::string& msg) : message(msg) {}
 
-struct Result {
-    uint64_t count;
-    double   time;
+public:
+    const char* c_str() const {
+        return message.c_str();
+    }
 };
 
+// --------------------------------------------------
 
-template <typename FN>
-Result run(FN function, const char* name, const uint8_t* data, size_t size, size_t iterations, double reference) {
+class CommandLine final {
 
-    Result result;
+public:
+    bool    print_help;
+    bool    print_csv;
+    size_t  chunks_count;
+    size_t  iteration_count;
+    std::string executable;
+    std::vector<std::string> functions;
+    std::vector<std::string> all_functions;
+    std::map<std::string, std::string> descriptions;
 
-    const auto t1 = std::chrono::high_resolution_clock::now();
+public:
+    CommandLine(int argc, char* argv[]);
 
-    printf("%-30s... ", name);
-    fflush(stdout);
+private:
+    void setup_functions();
+    void add_function(const std::string& name, const std::string& dsc);
+    bool is_name_valid(const std::string& arg);
+};
 
-    size_t n = 0;
-    size_t k = iterations;
-    while (k-- > 0) {
-        n += function(data, size);
+// --------------------------------------------------
+
+CommandLine::CommandLine(int argc, char* argv[])
+    : print_help(false)
+    , print_csv(false)
+    , chunks_count(0)
+    , iteration_count(0) {
+
+    setup_functions();
+
+    int positional = 0;
+    for (int i=1; i < argc; i++) {
+        const std::string arg = argv[i];
+
+        if (arg == "--help" || arg == "-h") {
+            print_help = true;
+            return;
+        }
+
+        if (arg == "--csv") {
+            print_csv = true;
+            continue;
+        }
+
+        // positional arguments
+        if (positional == 0) {
+            int tmp = std::atoi(arg.c_str());
+            if (tmp <= 0) {
+                throw Error("Size must be greater than 0.");
+            }
+
+            chunks_count = tmp;
+
+        } else if (positional == 1) {
+
+            int tmp = std::atoi(arg.c_str());
+            if (tmp <= 0) {
+                throw Error("Iteration count must be greater than 0.");
+            }
+
+            iteration_count = tmp;
+        } else {
+            if (is_name_valid(arg)) {
+                functions.push_back(std::move(arg));
+            } else {
+                throw Error("'" + arg + "' is not valid function name");
+            }
+        }
+
+        positional += 1;
     }
 
-    const auto t2 = std::chrono::high_resolution_clock::now();
-
-    const std::chrono::duration<double> td = t2-t1;
-    //printf("reference result = %lu, time = %0.6f s", n, td.count());
-    printf("time = %0.6f s", td.count());
-
-    if (reference > 0.0) {
-        const auto speedup = reference/td.count();
-
-        printf(" (speedup: %3.2f)", speedup);
+    if (positional < 2) {
+        print_help = true;
     }
+}
 
-    putchar('\n');
+void CommandLine::setup_functions() {
 
-    result.count = n; // to prevent compiler from optimizing out the loop
-    result.time  = td.count();
-
-    return result;
+    add_function("lookup-8", "LUT (uint8_t[256])"  );
+    add_function("lookup-64", "LUT (uint64_t[256])"        );
+    add_function("bit-parallel", "bit parallel"     );
+    add_function("bit-parallel-optimized", "bit parallel optimized");
+    add_function("harley-seal", "Harley-Seal popcount");
+    add_function("sse-bit-parallel", "bit parallel optimized - SSE");
+    add_function("sse-lookup", "SSSE3 [pshufb]");
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+    add_function("avx2-lookup", "AVX2 [pshufb]");
+#endif
+#if defined(HAVE_POPCNT_INSTRUCTION)
+    add_function("cpu", "CPU popcnt");
+#endif
 }
 
 
-int main(int argc, char* argv[]) {
+void CommandLine::add_function(const std::string& name, const std::string& description) {
 
-    // 1. parse arguments
-    std::set<std::string> functions;
+    all_functions.push_back(name);
+    descriptions.insert({name, description});
+}
 
-    if (argc < 3) {
-        print_help(argv[0]);
-        return EXIT_FAILURE;
+bool CommandLine::is_name_valid(const std::string& name) {
+
+    return descriptions.count(name);
+}
+
+// --------------------------------------------------
+
+class Application final {
+
+    const CommandLine& cmd;
+    size_t size;
+    std::unique_ptr<uint8_t[]> data;
+
+    uint64_t count;
+    double   time;
+
+    struct Result {
+        uint64_t count;
+        double   time;
+    };
+
+
+public:
+    Application(const CommandLine& cmdline);
+
+    int run();
+
+private:
+    void print_help();
+    void run_procedures();
+    void run_procedure(const std::string& name);
+
+    template <typename FN>
+    Result run(const std::string& name, FN function, double reference);
+};
+
+
+Application::Application(const CommandLine& cmdline)
+    : cmd(cmdline)
+    , size(cmdline.chunks_count * 16) {}
+
+
+int Application::run() {
+
+    if (cmd.print_help) {
+        print_help();
+    } else {
+        run_procedures();
     }
 
-    const int size  = std::atoi(argv[1]);
-    const int count = std::atoi(argv[2]);
+    return 0;
+}
 
-    if (size <= 0) {
-        printf("Size must be greater than 0.\n");
-        return EXIT_FAILURE;
-    }
+void Application::run_procedures() {
 
-    if (count <= 0) {
-        printf("Iteration count must be greater than 0.\n");
-        return EXIT_FAILURE;
-    }
+    data.reset(new uint8_t[size]);
 
-    for (int i=3; i < argc; i++) {
-        functions.insert(argv[i]);
-    }
-
-    // 2. initialize memory
-
-    uint8_t* data = static_cast<uint8_t*>(malloc(size));
-    if (data == nullptr) {
-        printf("allocation failed");
-        return EXIT_FAILURE;
-    }
-
-    for (int i=0; i < size; i++) {
+    for (size_t i=0; i < size; i++) {
         data[i] = i;
     }
 
+    if (!cmd.functions.empty()) {
+        for (const auto& name: cmd.functions) {
+            run_procedure(name);
+        }
+    } else {
+        for (const auto& name: cmd.all_functions) {
+            run_procedure(name);
+        }
+    }
+}
 
-    // 3. run the test
+void Application::run_procedure(const std::string& name) {
+    
+    if (name == "lookup-8") {
 
-    size_t n = 0;
-    double time = 0.0;
-
-    if (functions.empty() || functions.count("lookup-8")) {
-
-        auto result = run(popcnt_lookup_8bit, "LUT (uint8_t[256])", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_lookup_8bit, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
-    if (functions.empty() || functions.count("lookup-64")) {
+    if (name == "lookup-64") {
 
-        auto result = run(popcnt_lookup_64bit, "LUT (uint64_t[256])", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_lookup_64bit, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
-    if (functions.empty() || functions.count("bit-parallel")) {
+    if (name == "bit-parallel") {
 
-        auto result = run(popcnt_parallel_64bit_naive, "bit parallel", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_parallel_64bit_naive, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
-    if (functions.empty() || functions.count("bit-parallel-optimized")) {
+    if (name == "bit-parallel-optimized") {
 
-        auto result = run(popcnt_parallel_64bit_optimized, "bit parallel optimized", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_parallel_64bit_optimized, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
-    if (functions.empty() || functions.count("harley-seal")) {
+    if (name == "harley-seal") {
 
-        auto result = run(popcnt_harley_seal, "harley-seal", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_harley_seal, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
-    if (functions.empty() || functions.count("sse-bit-parallel")) {
+    if (name == "sse-bit-parallel") {
 
-        auto result = run(popcnt_SSE_bit_parallel, "bit parallel optimized - SSE", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_SSE_bit_parallel, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
-    if (functions.empty() || functions.count("sse-lookup")) {
+    if (name == "sse-lookup") {
 
-        auto result = run(popcnt_SSE_lookup, "SSSE3 [pshufb]", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_SSE_lookup, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
-    if (functions.empty() || functions.count("avx2-lookup")) {
+    if (name == "avx2-lookup") {
 
-        auto result = run(popcnt_AVX2_lookup, "AVX2 [pshufb]", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_AVX2_lookup, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
@@ -197,25 +297,69 @@ int main(int argc, char* argv[]) {
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
-    if (functions.empty() || functions.count("cpu")) {
+    if (name == "cpu") {
 
-        auto result = run(popcnt_cpu_64bit, "CPU popcnt", data, size, count, time);
-        n += result.count;
+        auto result = run(name, popcnt_cpu_64bit, time);
+        count += result.count;
         if (time == 0.0) {
             time = result.time;
         }
     }
 #endif
-
-    free(data);
-
-    return EXIT_SUCCESS;
 }
 
 
+template <typename FN>
+Application::Result Application::run(const std::string& name, FN function, double reference) {
 
-void print_help(const char* name) {
-    std::printf("usage: %s buffer_size iteration_count [function(s)]\n", name);
+    Result result;
+
+    if (cmd.print_csv) {
+        printf("%s, %lu, %lu, ", name.c_str(), cmd.chunks_count, cmd.iteration_count);
+        fflush(stdout);
+    } else {
+        printf("%-30s... ", cmd.descriptions.find(name)->second.c_str());
+        fflush(stdout);
+    }
+
+    size_t n = 0;
+    size_t k = cmd.iteration_count;
+
+    const auto t1 = std::chrono::high_resolution_clock::now();
+    while (k-- > 0) {
+        n += function(data.get(), size);
+    }
+
+    const auto t2 = std::chrono::high_resolution_clock::now();
+
+    const std::chrono::duration<double> td = t2-t1;
+
+    if (cmd.print_csv) {
+        printf("%0.6f\n", td.count());
+    } else {
+        //printf("reference result = %lu, time = %0.6f s", n, td.count());
+        printf("time = %0.6f s", td.count());
+
+        if (reference > 0.0) {
+            const auto speedup = reference/td.count();
+
+            printf(" (speedup: %3.2f)", speedup);
+        }
+
+        putchar('\n');
+    }
+
+    result.count = n; // to prevent compiler from optimizing out the loop
+    result.time  = td.count();
+
+    return result;
+}
+
+void Application::print_help() {
+    std::printf("usage: %s [--csv] buffer_size iteration_count [function(s)]\n", cmd.executable.c_str());
+    std::puts("");
+    std::puts("--csv               - print results in CVS format:");
+    std::puts("                      function name, buffer_size, iteration_count, time");
     std::puts("");
     std::puts("1. buffer_size      - size of buffer in 16-bytes chunks");
     std::puts("2. iteration_count  - as the name states");
@@ -237,21 +381,23 @@ void print_help(const char* name) {
 }
 
 
-bool is_name_valid(const std::string& name) {
 
-    return (name == "lookup-8")
-        || (name == "lookup-64")
-        || (name == "bit-parallel")
-        || (name == "bit-parallel-optimized")
-        || (name == "harley-seal")
-        || (name == "sse-bit-parallel")
-        || (name == "sse-lookup")
-#if defined(HAVE_AVX2_INSTRUCTIONS)
-        || (name == "avx2-lookup")
-#endif
-#if defined(HAVE_POPCNT_INSTRUCTION)
-        || (name == "cpu")
-#endif
-        ;
+
+
+
+int main(int argc, char* argv[]) {
+
+    try {
+        CommandLine cmd(argc, argv);
+        Application app(cmd);
+
+        return app.run();
+    } catch (Error& e) {
+        puts(e.c_str());
+
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
 
