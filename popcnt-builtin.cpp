@@ -3,16 +3,16 @@
 
 
 // Note: this emits a popcnt with clang 3.4 but not with clang 3.0
-uint32_t builtin_popcnt(const uint64_t* buf, int len) {
-  int cnt = 0;
+uint64_t builtin_popcnt(const uint64_t* buf, int len) {
+  uint64_t cnt = 0;
   for (int i = 0; i < len; ++i) {
     cnt += __builtin_popcountll(buf[i]);
   }
   return cnt;
 }
 
-uint32_t builtin_popcnt32(const uint64_t* buf64, int len64) {
-  int cnt = 0;
+uint64_t builtin_popcnt32(const uint64_t* buf64, int len64) {
+  uint64_t cnt = 0;
   const uint32_t* buf = (const uint32_t*) buf64;
   int len = len64 * 2;
   for (int i = 0; i < len; ++i) {
@@ -21,9 +21,9 @@ uint32_t builtin_popcnt32(const uint64_t* buf64, int len64) {
   return cnt;
 }
 
-uint32_t builtin_popcnt_unrolled(const uint64_t* buf, int len) {
+uint64_t builtin_popcnt_unrolled(const uint64_t* buf, int len) {
   assert(len % 4 == 0);
-  int cnt = 0;
+  uint64_t cnt = 0;
   for (int i = 0; i < len; i+=4) {
     cnt += __builtin_popcountll(buf[i]);
     cnt += __builtin_popcountll(buf[i+1]);
@@ -33,11 +33,11 @@ uint32_t builtin_popcnt_unrolled(const uint64_t* buf, int len) {
   return cnt;
 }
 
-uint32_t builtin_popcnt_unrolled32(const uint64_t* buf64, int len64) {
+uint64_t builtin_popcnt_unrolled32(const uint64_t* buf64, int len64) {
   const uint32_t* buf = (const uint32_t*) buf64;
   int len = len64 * 2;
   assert(len % 4 == 0);
-  int cnt = 0;
+  uint64_t cnt = 0;
   for (int i = 0; i < len; i+=4) {
     cnt += __builtin_popcount(buf[i]);
     cnt += __builtin_popcount(buf[i+1]);
@@ -51,9 +51,9 @@ uint32_t builtin_popcnt_unrolled32(const uint64_t* buf64, int len64) {
 // gcc is too smart to fall for this and re-creates the dependency unless
 // compiled with -funroll-loops or something similar.
 // This works with clang, though.
-uint32_t builtin_popcnt_unrolled_errata(const uint64_t* buf, int len) {
+uint64_t builtin_popcnt_unrolled_errata(const uint64_t* buf, int len) {
   assert(len % 4 == 0);
-  int cnt[4];
+  uint64_t cnt[4];
   for (int i = 0; i < 4; ++i) {
     cnt[i] = 0;
   }
@@ -71,7 +71,7 @@ uint32_t builtin_popcnt_unrolled_errata(const uint64_t* buf, int len) {
 // bad optimizations.
 // This code is from Alex Yee.
 
-uint32_t builtin_popcnt_unrolled_errata_manual(const uint64_t* buf, int len) {
+uint64_t builtin_popcnt_unrolled_errata_manual(const uint64_t* buf, int len) {
   assert(len % 4 == 0);
   uint64_t cnt[4];
   for (int i = 0; i < 4; ++i) {
@@ -99,8 +99,8 @@ uint32_t builtin_popcnt_unrolled_errata_manual(const uint64_t* buf, int len) {
 // This works as intended with clang, but gcc turns the MOVQ intrinsic into an xmm->mem 
 // operation which defeats the purpose of using MOVQ.
 
-uint32_t builtin_popcnt_movdq(const uint64_t* buf, int len) {
-  int cnt = 0;
+uint64_t builtin_popcnt_movdq(const uint64_t* buf, int len) {
+  uint64_t cnt = 0;
   __m128i temp;
   __m128i temp2;
   uint64_t lower64;
@@ -122,14 +122,14 @@ uint32_t builtin_popcnt_movdq(const uint64_t* buf, int len) {
 // Clang handles the movq correctly but it optimizes away the seperate cnt
 // variables, causing the popcnt false register dependcy to reduce performance.
 
-uint32_t builtin_popcnt_movdq_unrolled(const uint64_t* buf, int len) {
-  int cnt[4];
+uint64_t builtin_popcnt_movdq_unrolled(const uint64_t* buf, int len) {
+  uint64_t cnt[4];
   __m128i temp[2];
   __m128i temp_upper[2];
   uint64_t lower64[2];
   uint64_t upper64[2];
 
-  for (int i = 0; i < 2; ++i) {
+  for (int i = 0; i < 4; ++i) {
     cnt[i] = 0;
   }
 
@@ -150,13 +150,10 @@ uint32_t builtin_popcnt_movdq_unrolled(const uint64_t* buf, int len) {
   return cnt[0] + cnt[1] + cnt[2] + cnt[3];
 }
 
-uint32_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
+uint64_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
   uint64_t cnt[4];
-  __m128i temp_upper[2];
-  uint64_t lower64[2];
-  uint64_t upper64[2];
 
-  for (int i = 0; i < 2; ++i) {
+  for (int i = 0; i < 4; ++i) {
     cnt[i] = 0;
   }
 
