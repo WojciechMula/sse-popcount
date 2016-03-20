@@ -79,7 +79,7 @@ uint64_t builtin_popcnt_unrolled_errata_manual(const uint64_t* buf, int len) {
   }
 
   for (int i = 0; i < len; i+=4) {
-    __asm__ __volatile__(    
+    __asm__ __volatile__(
 	    "popcnt %4, %4  \n\t"
 	    "add %4, %0     \n\t"
 	    "popcnt %5, %5  \n\t"
@@ -89,14 +89,14 @@ uint64_t builtin_popcnt_unrolled_errata_manual(const uint64_t* buf, int len) {
 	    "popcnt %7, %7  \n\t"
 	    "add %7, %3     \n\t"
 	    : "+r" (cnt[0]), "+r" (cnt[1]), "+r" (cnt[2]), "+r" (cnt[3])
-	    : "r"  (buf[i]), "r"  (buf[i+1]), "r"  (buf[i+2]), "r"  (buf[i+3])    
+	    : "r"  (buf[i]), "r"  (buf[i+1]), "r"  (buf[i+2]), "r"  (buf[i+3])
 		);
   }
   return cnt[0] + cnt[1] + cnt[2] + cnt[3];
 }
 
 
-// This works as intended with clang, but gcc turns the MOVQ intrinsic into an xmm->mem 
+// This works as intended with clang, but gcc turns the MOVQ intrinsic into an xmm->mem
 // operation which defeats the purpose of using MOVQ.
 
 uint64_t builtin_popcnt_movdq(const uint64_t* buf, int len) {
@@ -172,7 +172,7 @@ uint64_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
     uint64_t dummy0_upper;
     uint64_t dummy1_upper;
 
-    __asm__ __volatile__(    	    
+    __asm__ __volatile__(
 	    "movhlps %10, %6 \n\t"
 	    "movhlps %11, %7 \n\t"
 	    "movq %10, %4    \n\t"
@@ -187,8 +187,8 @@ uint64_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
 	    "add %8, %2     \n\t"
 	    "popcnt %9, %9  \n\t"
 	    "add %9, %3     \n\t"
-	    : "+r" (cnt[0]), "+r" (cnt[1]), "+r" (cnt[2]), "+r" (cnt[3]), 
-	      "=&r" (dummy0), "=&r" (dummy1),	"=x" (x0_upper), "=x" (x1_upper), 
+	    : "+r" (cnt[0]), "+r" (cnt[1]), "+r" (cnt[2]), "+r" (cnt[3]),
+	      "=&r" (dummy0), "=&r" (dummy1),	"=x" (x0_upper), "=x" (x1_upper),
 	      "=&r" (dummy0_upper), "=&r" (dummy1_upper)
 	    : "x"  (x0), "x"  (x1)
 		);

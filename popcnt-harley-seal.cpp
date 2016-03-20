@@ -1,6 +1,6 @@
 namespace {
 
-/// This uses fewer arithmetic operations than any other known  
+/// This uses fewer arithmetic operations than any other known
 /// implementation on machines with fast multiplication.
 /// It uses 12 arithmetic operations, one of which is a multiply.
 /// http://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
@@ -23,7 +23,7 @@ uint64_t popcount_mul(uint64_t x)
 ///
 void CSA(uint64_t& h, uint64_t& l, uint64_t a, uint64_t b, uint64_t c)
 {
-  uint64_t u = a ^ b; 
+  uint64_t u = a ^ b;
   h = (a & b) | (u & c);
   l = u ^ c;
 }
@@ -46,17 +46,17 @@ uint64_t popcnt_harley_seal_64bit(const uint64_t* data, const uint64_t size)
   {
     CSA(twosA, ones, ones, data[i+0], data[i+1]);
     CSA(twosB, ones, ones, data[i+2], data[i+3]);
-    CSA(foursA, twos, twos, twosA, twosB);    
+    CSA(foursA, twos, twos, twosA, twosB);
     CSA(twosA, ones, ones, data[i+4], data[i+5]);
     CSA(twosB, ones, ones, data[i+6], data[i+7]);
-    CSA(foursB, twos, twos, twosA, twosB);    
+    CSA(foursB, twos, twos, twosA, twosB);
     CSA(eightsA,fours, fours, foursA, foursB);
     CSA(twosA, ones, ones, data[i+8], data[i+9]);
     CSA(twosB, ones, ones, data[i+10], data[i+11]);
     CSA(foursA, twos, twos, twosA, twosB);
     CSA(twosA, ones, ones, data[i+12], data[i+13]);
     CSA(twosB, ones, ones, data[i+14], data[i+15]);
-    CSA(foursB, twos, twos, twosA, twosB);    
+    CSA(foursB, twos, twos, twosA, twosB);
     CSA(eightsB, fours, fours, foursA, foursB);
     CSA(sixteens, eights, eights, eightsA, eightsB);
 

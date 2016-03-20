@@ -10,7 +10,7 @@ std::uint64_t popcnt_SSE_bit_parallel(const uint8_t* data, const size_t n) {
 
     while (i + 4*16 < n) {
 
-        __m128i partial = _mm_setzero_si128(); 
+        __m128i partial = _mm_setzero_si128();
 
 #define ITER { \
             const __m128i t1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + i)); \

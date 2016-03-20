@@ -41,7 +41,7 @@ __m128i operator>>(const __m128i a, const shift16 amount) {
 
 
 uint64_t lower_qword(const __m128i v) {
-    
+
     return _mm_cvtsi128_si64(v);
 }
 
