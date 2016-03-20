@@ -24,6 +24,7 @@
 #include "popcnt-sse-lookup.cpp"
 
 #include "popcnt-cpu.cpp"
+#include "popcnt-builtin.cpp"
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
@@ -138,6 +139,16 @@ void CommandLine::setup_functions() {
 #endif
 #if defined(HAVE_POPCNT_INSTRUCTION)
     add_function("cpu", "CPU popcnt");
+
+    add_function("builtin-popcnt",                           "builtin_popcnt");
+    add_function("builtin-popcnt32",                         "builtin_popcnt32");
+    add_function("builtin-popcnt-unrolled",                  "builtin_popcnt_unrolled");
+    add_function("builtin-popcnt-unrolled32",                "builtin_popcnt_unrolled32");
+    add_function("builtin-popcnt-unrolled-errata",           "builtin_popcnt_unrolled_errata");
+    add_function("builtin-popcnt-unrolled-errata-manual",    "builtin_popcnt_unrolled_errata_manual");
+    add_function("builtin-popcnt-movdq",                     "builtin_popcnt_movdq");
+    add_function("builtin-popcnt-movdq-unrolled",            "builtin_popcnt_movdq_unrolled");
+    add_function("builtin-popcnt-movdq-unrolled_manual",     "builtin_popcnt_movdq_unrolled_manual");
 #endif
 }
 
@@ -223,90 +234,48 @@ void Application::run_procedures() {
 
 void Application::run_procedure(const std::string& name) {
     
-    if (name == "lookup-8") {
-
-        auto result = run(name, popcnt_lookup_8bit, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
+#define RUN(function_name, function) \
+    if (name == function_name) { \
+        auto result = run(name, function, time); \
+        count += result.count; \
+        if (time == 0.0) { \
+            time = result.time; \
+        } \
     }
 
-    if (name == "lookup-64") {
-
-        auto result = run(name, popcnt_lookup_64bit, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "bit-parallel") {
-
-        auto result = run(name, popcnt_parallel_64bit_naive, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "bit-parallel-optimized") {
-
-        auto result = run(name, popcnt_parallel_64bit_optimized, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "harley-seal") {
-
-        auto result = run(name, popcnt_harley_seal, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "sse-bit-parallel") {
-
-        auto result = run(name, popcnt_SSE_bit_parallel, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "sse-lookup") {
-
-        auto result = run(name, popcnt_SSE_lookup, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
+    RUN("lookup-8",                 popcnt_lookup_8bit)
+    RUN("lookup-64",                popcnt_lookup_64bit);
+    RUN("bit-parallel",             popcnt_parallel_64bit_naive);
+    RUN("bit-parallel-optimized",   popcnt_parallel_64bit_optimized);
+    RUN("harley-seal",              popcnt_harley_seal);
+    RUN("sse-bit-parallel",         popcnt_SSE_bit_parallel);
+    RUN("sse-lookup",               popcnt_SSE_lookup);
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
-    if (name == "avx2-lookup") {
-
-        auto result = run(name, popcnt_AVX2_lookup, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
+    RUN("avx2-lookup", popcnt_AVX2_lookup);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
-    if (name == "cpu") {
-
-        auto result = run(name, popcnt_cpu_64bit, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
+    RUN("cpu", popcnt_cpu_64bit);
 #endif
+
+#define RUN_BUILTIN(function_name, function) \
+    { \
+        auto wrapper = [](const uint8_t* data, size_t size) { \
+            return function(reinterpret_cast<const uint64_t*>(data), size/8); \
+        }; \
+        RUN(function_name, wrapper); \
+    }
+
+    RUN_BUILTIN("builtin-popcnt",                           builtin_popcnt);
+    RUN_BUILTIN("builtin-popcnt32",                         builtin_popcnt32);
+    RUN_BUILTIN("builtin-popcnt-unrolled",                  builtin_popcnt_unrolled);
+    RUN_BUILTIN("builtin-popcnt-unrolled32",                builtin_popcnt_unrolled32);
+    RUN_BUILTIN("builtin-popcnt-unrolled-errata",           builtin_popcnt_unrolled_errata);
+    RUN_BUILTIN("builtin-popcnt-unrolled-errata-manual",    builtin_popcnt_unrolled_errata_manual);
+    RUN_BUILTIN("builtin-popcnt-movdq",                     builtin_popcnt_movdq);
+    RUN_BUILTIN("builtin-popcnt-movdq-unrolled",            builtin_popcnt_movdq_unrolled);
+    RUN_BUILTIN("builtin-popcnt-movdq-unrolled_manual",     builtin_popcnt_movdq_unrolled_manual);
 }
 
 
@@ -380,10 +349,6 @@ void Application::print_help() {
     std::puts("   * cpu                     - CPU instruction popcnt (64-bit variant)");
 #endif
 }
-
-
-
-
 
 
 int main(int argc, char* argv[]) {

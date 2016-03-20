@@ -79,7 +79,7 @@ uint64_t builtin_popcnt_unrolled_errata_manual(const uint64_t* buf, int len) {
   }
 
   for (int i = 0; i < len; i+=4) {
-    __asm__(    
+    __asm__ __volatile__(    
 	    "popcnt %4, %4  \n\t"
 	    "add %4, %0     \n\t"
 	    "popcnt %5, %5  \n\t"
@@ -147,6 +147,9 @@ uint64_t builtin_popcnt_movdq_unrolled(const uint64_t* buf, int len) {
     cnt[2] += __builtin_popcountll(upper64[0]);
     cnt[3] += __builtin_popcountll(upper64[1]);
   }
+
+  __asm__ __volatile__("":::"memory"); // without this GCC 4.9.2 optimized out the loop
+
   return cnt[0] + cnt[1] + cnt[2] + cnt[3];
 }
 
@@ -169,7 +172,7 @@ uint64_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
     uint64_t dummy0_upper;
     uint64_t dummy1_upper;
 
-    __asm__(    	    
+    __asm__ __volatile__(    	    
 	    "movhlps %10, %6 \n\t"
 	    "movhlps %11, %7 \n\t"
 	    "movq %10, %4    \n\t"
