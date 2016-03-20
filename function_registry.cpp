@@ -86,6 +86,8 @@ const Function& FunctionRegistry::get(const std::string& name) const {
 
 
 void FunctionRegistry::build() {
+    // definition start
+
     add_trusted("lookup-8",
                 "lookup in std::uint8_t[256] LUT",
                 popcnt_lookup_8bit);
@@ -159,6 +161,7 @@ void FunctionRegistry::build() {
         "builtin-popcnt-movdq unrolled (assembly code)",
         builtin_popcnt_movdq_unrolled_manual);
 #endif
+    // definition end
 }
 
 
