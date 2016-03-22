@@ -1,6 +1,9 @@
 .PHONY: all x86 avx avx2 help
 
-CC=g++
+# user can do CXX=g++ make
+# It's more fexlible to change from command line
+# The make builtin rule states CXX to be g++.
+
 FLAGS=-std=c++11 -mpopcnt -O2 -Wall -pedantic -Wextra
 
 DEPS=popcnt-*.cpp function_registry.cpp config.h
@@ -27,34 +30,34 @@ avx: $(ALL_AVX)
 avx2: $(ALL_AVX2)
 
 speed: $(DEPS) speed.cpp
-	$(CC) $(FLAGS) -mssse3 speed.cpp -o $@
+	$(CXX) $(FLAGS) -mssse3 speed.cpp -o $@_$(CXX)
 
 verify: $(DEPS) verify.cpp
-	$(CC) $(FLAGS) -mssse3 verify.cpp -o $@
+	$(CXX) $(FLAGS) -mssse3 verify.cpp -o $@_$(CXX)
 
 speed_avx: $(DEPS) speed.cpp
-	$(CC) $(FLAGS) -mavx speed.cpp -o $@
+	$(CXX) $(FLAGS) -mavx speed.cpp -o $@_$(CXX)
 
 verify_avx: $(DEPS) verify.cpp
-	$(CC) $(FLAGS) -mavx verify.cpp -o $@
+	$(CXX) $(FLAGS) -mavx verify.cpp -o $@_$(CXX)
 
 speed_avx2: $(DEPS) speed.cpp
-	$(CC) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS speed.cpp -o $@
+	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS speed.cpp -o $@_$(CXX)
 
 verify_avx2: $(DEPS) verify.cpp
-	$(CC) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS verify.cpp -o $@
+	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS verify.cpp -o $@_$(CXX)
 
 SIZE=10000000
 ITERS=100
 
 run: speed
-	./speed $(SIZE) $(ITERS)
+	./speed_$(CXX) $(SIZE) $(ITERS)
 
 run_avx: speed_avx
-	./speed_avx $(SIZE) $(ITERS)
+	./speed_avx_$(CXX) $(SIZE) $(ITERS)
 
 run_avx2: speed_avx2
-	./speed_avx2 $(SIZE) $(ITERS)
+	./speed_avx2_$(CXX) $(SIZE) $(ITERS)
 
 clean:
-	rm -f $(ALL) $(ALL_AVX) $(ALL_AVX2)
+	rm -f speed_* verify_*
