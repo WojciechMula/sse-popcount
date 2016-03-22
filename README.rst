@@ -12,16 +12,47 @@ Subdirectory **original** contains code from 2008 --- it is 32-bit
 and GCC-centric. The **root directory** contains fresh C++11 code,
 written with intrinsics and tested on 64-bit machine.
 
-As usual type ``make`` to compile programs, then you can invoke:
+The project now uses GNU autotools for the build. User need to install
+autoconf and automake to create the ``configure`` script and
+``Makefile`` to compile the program.
 
-* ``verify``/``verify_avx2`` --- program tests if all non-lookup
-  implementations counts bits properly.
-* ``speed``/``speed_avx2`` --- program tests different implementations
-  of popcount procedure; please read help to find all options
-  (run the program without arguments).
+::
+    autoreconf -vif # generates configure
+    ./configure [--disable-ansi-console]
+    make
+    make run # runs the speed test
+    ./verify # verify if the implementations were correct
 
-You can also run ``make run`` and ``make run_avx2`` to run ``speed``
-for all available implementations.
+User can check ``./configure --help`` for more options that can be used
+to setup the build. If the host machine has AVX2 instruction set,
+the two program ``verify`` and ``speed`` will have AVX2 instructions
+baked in.
+
+The ``configure`` test for AVX2 instruction requires GCC compiler
+specific builtin ``__builtin_cpu_supports``. For the platforms that
+doesn't use gcc by default, can setup the configuration like so.
+
+::
+    CC=gcc CXX=g++ ./configure
+    make
+
+On the OSX platform ``gcc`` by default references to ``clang``. User can
+install ``gcc`` using homebrew. If the installed version were 4.8.
+``gcc-48`` should be available. If installed version were 5, ``gcc-5``
+can be used. Point the environment variables to the gcc compiler on your
+machine correspondingly.
+
+After ``make`` you'll get two programs:
+
+* ``verify`` --- program tests if all non-lookup implementations counts
+bits properly.
+
+* ``speed`` --- program tests different implementations of popcount
+procedure; please read help to find all options (run the program without
+arguments).
+
+You can also run ``make run`` to run ``speed`` for all available
+implementations.
 
 
 Available implementations in the new version
