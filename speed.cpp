@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <cstdio>
 #include <cassert>
 
 #include <memory>
