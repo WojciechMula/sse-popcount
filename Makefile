@@ -30,34 +30,34 @@ avx: $(ALL_AVX)
 avx2: $(ALL_AVX2)
 
 speed: $(DEPS) speed.cpp
-	$(CXX) $(FLAGS) -mssse3 speed.cpp -o $@_$(CXX)
+	$(CXX) $(FLAGS) -mssse3 speed.cpp -o $@_$(notdir $(CXX))
 
 verify: $(DEPS) verify.cpp
-	$(CXX) $(FLAGS) -mssse3 verify.cpp -o $@_$(CXX)
+	$(CXX) $(FLAGS) -mssse3 verify.cpp -o $@_$(notdir $(CXX))
 
 speed_avx: $(DEPS) speed.cpp
-	$(CXX) $(FLAGS) -mavx speed.cpp -o $@_$(CXX)
+	$(CXX) $(FLAGS) -mavx speed.cpp -o $@_$(notdir $(CXX))
 
 verify_avx: $(DEPS) verify.cpp
-	$(CXX) $(FLAGS) -mavx verify.cpp -o $@_$(CXX)
+	$(CXX) $(FLAGS) -mavx verify.cpp -o $@_$(notdir $(CXX))
 
 speed_avx2: $(DEPS) speed.cpp
-	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS speed.cpp -o $@_$(CXX)
+	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS speed.cpp -o $@_$(notdir $(CXX))
 
 verify_avx2: $(DEPS) verify.cpp
-	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS verify.cpp -o $@_$(CXX)
+	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS verify.cpp -o $@_$(notdir $(CXX))
 
 SIZE=10000000
 ITERS=100
 
 run: speed
-	./speed_$(CXX) $(SIZE) $(ITERS)
+	./speed_$(notdir $(CXX)) $(SIZE) $(ITERS)
 
 run_avx: speed_avx
-	./speed_avx_$(CXX) $(SIZE) $(ITERS)
+	./speed_avx_$(notdir $(CXX)) $(SIZE) $(ITERS)
 
 run_avx2: speed_avx2
-	./speed_avx2_$(CXX) $(SIZE) $(ITERS)
+	./speed_avx2_$(notdir $(CXX)) $(SIZE) $(ITERS)
 
 clean:
 	rm -f speed_* verify_*
