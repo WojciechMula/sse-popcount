@@ -25,7 +25,7 @@
 #include "popcnt-cpu.cpp"
 #include "popcnt-builtin.cpp"
 
-#if defined(HAVE_AVX2_INSTRUCTIONS)
+#if(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
 #endif
 
@@ -211,7 +211,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("sse-bit-parallel",         popcnt_SSE_bit_parallel);
     RUN("sse-lookup",               popcnt_SSE_lookup);
 
-#if defined(HAVE_AVX2_INSTRUCTIONS)
+#if(HAVE_AVX2_INSTRUCTIONS)
     RUN("avx2-lookup", popcnt_AVX2_lookup);
 #endif
 
