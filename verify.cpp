@@ -23,7 +23,7 @@
 #include "popcnt-sse-lookup.cpp"
 #include "popcnt-cpu.cpp"
 #include "popcnt-builtin.cpp"
-#if defined(HAVE_AVX2_INSTRUCTIONS)
+#if(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
 #endif
 

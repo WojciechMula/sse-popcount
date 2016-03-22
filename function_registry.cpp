@@ -115,7 +115,7 @@ void FunctionRegistry::build() {
     add("sse-lookup",
         "SSSE3 variant using pshufb instruction",
         popcnt_SSE_lookup);
-#if defined(HAVE_AVX2_INSTRUCTIONS)
+#if(HAVE_AVX2_INSTRUCTIONS)
     add("avx2-lookup",
         "AVX2 variant using pshufb instruction",
         popcnt_AVX2_lookup);

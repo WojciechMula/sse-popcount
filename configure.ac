@@ -29,6 +29,17 @@ AC_DEFINE_UNQUOTED([HAVE_ANSI_CONSOLE],
   [$ANSI_CONSOLE],
   [defined if want to support ansi color console])
 
+AC_ARG_WITH([ssse3],
+  [AS_HELP_STRING([--with-ssse3],[use ssse3 and suppress avx instructions])],
+  [],
+  [with_ssse3=no])
+
+AS_IF([test "X$with_ssse3" = "Xyes"],
+ [AC_DEFINE([HAVE_AVX2_INSTRUCTIONS],[0],[Suppress avx2 instructions])
+  X86_FEATURE_CFLAGS="-mssse3 -mpopcnt"
+ ])
+
+
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADERS([config.h])
