@@ -8,8 +8,7 @@
 #include <cassert>
 
 #include <memory>
-#include <map>
-#include <vector>
+#include <set>
 #include <string>
 #include <chrono>
 
@@ -24,10 +23,13 @@
 #include "popcnt-sse-lookup.cpp"
 
 #include "popcnt-cpu.cpp"
+#include "popcnt-builtin.cpp"
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
 #endif
+
+#include "function_registry.cpp"
 
 // --------------------------------------------------
 
@@ -54,28 +56,19 @@ public:
     size_t  size;
     size_t  iteration_count;
     std::string executable;
-    std::vector<std::string> functions;
-    std::vector<std::string> all_functions;
-    std::map<std::string, std::string> descriptions;
+    std::set<std::string> functions;
 
 public:
-    CommandLine(int argc, char* argv[]);
-
-private:
-    void setup_functions();
-    void add_function(const std::string& name, const std::string& dsc);
-    bool is_name_valid(const std::string& arg);
+    CommandLine(int argc, char* argv[], const FunctionRegistry& names);
 };
 
 // --------------------------------------------------
 
-CommandLine::CommandLine(int argc, char* argv[])
+CommandLine::CommandLine(int argc, char* argv[], const FunctionRegistry& names)
     : print_help(false)
     , print_csv(false)
     , size(0)
     , iteration_count(0) {
-
-    setup_functions();
 
     int positional = 0;
     for (int i=1; i < argc; i++) {
@@ -98,6 +91,10 @@ CommandLine::CommandLine(int argc, char* argv[])
                 throw Error("Size must be greater than 0.");
             }
 
+            if (tmp % 32 != 0) {
+                throw Error("Size must be divisible by 32.");
+            }
+
             size = tmp;
 
         } else if (positional == 1) {
@@ -109,8 +106,8 @@ CommandLine::CommandLine(int argc, char* argv[])
 
             iteration_count = tmp;
         } else {
-            if (is_name_valid(arg)) {
-                functions.push_back(std::move(arg));
+            if (names.has(arg)) {
+                functions.insert(std::move(arg));
             } else {
                 throw Error("'" + arg + "' is not valid function name");
             }
@@ -124,40 +121,13 @@ CommandLine::CommandLine(int argc, char* argv[])
     }
 }
 
-void CommandLine::setup_functions() {
-
-    add_function("lookup-8", "LUT (uint8_t[256])"  );
-    add_function("lookup-64", "LUT (uint64_t[256])"        );
-    add_function("bit-parallel", "bit parallel"     );
-    add_function("bit-parallel-optimized", "bit parallel optimized");
-    add_function("harley-seal", "Harley-Seal popcount");
-    add_function("sse-bit-parallel", "bit parallel optimized - SSE");
-    add_function("sse-lookup", "SSSE3 [pshufb]");
-#if defined(HAVE_AVX2_INSTRUCTIONS)
-    add_function("avx2-lookup", "AVX2 [pshufb]");
-#endif
-#if defined(HAVE_POPCNT_INSTRUCTION)
-    add_function("cpu", "CPU popcnt");
-#endif
-}
-
-
-void CommandLine::add_function(const std::string& name, const std::string& description) {
-
-    all_functions.push_back(name);
-    descriptions.insert({name, description});
-}
-
-bool CommandLine::is_name_valid(const std::string& name) {
-
-    return descriptions.count(name);
-}
 
 // --------------------------------------------------
 
 class Application final {
 
     const CommandLine& cmd;
+    const FunctionRegistry& names;
     std::unique_ptr<uint8_t[]> data;
 
     uint64_t count;
@@ -170,7 +140,7 @@ class Application final {
 
 
 public:
-    Application(const CommandLine& cmdline);
+    Application(const CommandLine& cmdline, const FunctionRegistry& names);
 
     int run();
 
@@ -184,8 +154,9 @@ private:
 };
 
 
-Application::Application(const CommandLine& cmdline)
-    : cmd(cmdline) {}
+Application::Application(const CommandLine& cmdline, const FunctionRegistry& names)
+    : cmd(cmdline)
+    , names(names) {}
 
 
 int Application::run() {
@@ -215,98 +186,56 @@ void Application::run_procedures() {
             run_procedure(name);
         }
     } else {
-        for (const auto& name: cmd.all_functions) {
+        for (const auto& name: names.get_available()) {
             run_procedure(name);
         }
     }
 }
 
 void Application::run_procedure(const std::string& name) {
-    
-    if (name == "lookup-8") {
 
-        auto result = run(name, popcnt_lookup_8bit, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
+#define RUN(function_name, function) \
+    if (name == function_name) { \
+        auto result = run(name, function, time); \
+        count += result.count; \
+        if (time == 0.0) { \
+            time = result.time; \
+        } \
     }
 
-    if (name == "lookup-64") {
-
-        auto result = run(name, popcnt_lookup_64bit, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "bit-parallel") {
-
-        auto result = run(name, popcnt_parallel_64bit_naive, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "bit-parallel-optimized") {
-
-        auto result = run(name, popcnt_parallel_64bit_optimized, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "harley-seal") {
-
-        auto result = run(name, popcnt_harley_seal, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "sse-bit-parallel") {
-
-        auto result = run(name, popcnt_SSE_bit_parallel, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
-
-    if (name == "sse-lookup") {
-
-        auto result = run(name, popcnt_SSE_lookup, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
+    RUN("lookup-8",                 popcnt_lookup_8bit)
+    RUN("lookup-64",                popcnt_lookup_64bit);
+    RUN("bit-parallel",             popcnt_parallel_64bit_naive);
+    RUN("bit-parallel-optimized",   popcnt_parallel_64bit_optimized);
+    RUN("harley-seal",              popcnt_harley_seal);
+    RUN("sse-bit-parallel",         popcnt_SSE_bit_parallel);
+    RUN("sse-lookup",               popcnt_SSE_lookup);
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
-    if (name == "avx2-lookup") {
-
-        auto result = run(name, popcnt_AVX2_lookup, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
+    RUN("avx2-lookup", popcnt_AVX2_lookup);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
-    if (name == "cpu") {
-
-        auto result = run(name, popcnt_cpu_64bit, time);
-        count += result.count;
-        if (time == 0.0) {
-            time = result.time;
-        }
-    }
+    RUN("cpu", popcnt_cpu_64bit);
 #endif
+
+#define RUN_BUILTIN(function_name, function) \
+    { \
+        auto wrapper = [](const uint8_t* data, size_t size) { \
+            return function(reinterpret_cast<const uint64_t*>(data), size/8); \
+        }; \
+        RUN(function_name, wrapper); \
+    }
+
+    RUN_BUILTIN("builtin-popcnt",                           builtin_popcnt);
+    RUN_BUILTIN("builtin-popcnt32",                         builtin_popcnt32);
+    RUN_BUILTIN("builtin-popcnt-unrolled",                  builtin_popcnt_unrolled);
+    RUN_BUILTIN("builtin-popcnt-unrolled32",                builtin_popcnt_unrolled32);
+    RUN_BUILTIN("builtin-popcnt-unrolled-errata",           builtin_popcnt_unrolled_errata);
+    RUN_BUILTIN("builtin-popcnt-unrolled-errata-manual",    builtin_popcnt_unrolled_errata_manual);
+    RUN_BUILTIN("builtin-popcnt-movdq",                     builtin_popcnt_movdq);
+    RUN_BUILTIN("builtin-popcnt-movdq-unrolled",            builtin_popcnt_movdq_unrolled);
+    RUN_BUILTIN("builtin-popcnt-movdq-unrolled_manual",     builtin_popcnt_movdq_unrolled_manual);
 }
 
 
@@ -319,7 +248,8 @@ Application::Result Application::run(const std::string& name, FN function, doubl
         printf("%s, %lu, %lu, ", name.c_str(), cmd.size, cmd.iteration_count);
         fflush(stdout);
     } else {
-        printf("%-30s... ", cmd.descriptions.find(name)->second.c_str());
+        const auto& dsc = names.get(name);
+        printf("%-30s... ", dsc.name.c_str());
         fflush(stdout);
     }
 
@@ -366,31 +296,21 @@ void Application::print_help() {
     std::puts("2. iteration_count  - as the name states");
 
     std::puts("3. one or more functions (if not given all will run):");
-    std::puts("   * sse-lookup              - SSSE3 variant using pshufb instruction");
-#if defined(HAVE_AVX2_INSTRUCTIONS)
-    std::puts("   * avx2-lookup             - AVX2 variant using pshufb instruction");
-#endif
-    std::puts("   * lookup-8                - lookup in std::uint8_t[256] LUT");
-    std::puts("   * lookup-64               - lookup in std::uint64_t[256] LUT");
-    std::puts("   * bit-parallel            - naive bit parallel method");
-    std::puts("   * bit-parallel-optimized  - a bit better bit parallel");
-    std::puts("   * harley-seal             - Harley-Seal popcount (4th iteration)");
-    std::puts("   * sse-bit-parallel        - SSE implementation of bit-parallel-optimized");
-#if defined(HAVE_POPCNT_INSTRUCTION)
-    std::puts("   * cpu                     - CPU instruction popcnt (64-bit variant)");
-#endif
+
+    const int w = names.get_widest_name();
+    for (const auto& item: names.get_functions()) {
+
+        std::printf("  * %*s - %s\n", -w, item.name.c_str(), item.help.c_str());
+    }
 }
-
-
-
-
 
 
 int main(int argc, char* argv[]) {
 
     try {
-        CommandLine cmd(argc, argv);
-        Application app(cmd);
+        FunctionRegistry names;
+        CommandLine cmd(argc, argv, names);
+        Application app(cmd, names);
 
         return app.run();
     } catch (Error& e) {

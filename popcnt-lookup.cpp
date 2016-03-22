@@ -137,7 +137,7 @@ uint8_t lookup8bit[256] = {
 
 
 std::uint64_t popcnt_lookup_8bit(const uint8_t* data, const size_t n) {
-    
+
     size_t result = 0;
 
     size_t i = 0;
@@ -157,7 +157,7 @@ std::uint64_t popcnt_lookup_8bit(const uint8_t* data, const size_t n) {
 
 
 std::uint64_t popcnt_lookup_64bit(const uint8_t* data, const size_t n) {
-    
+
     size_t result = 0;
 
     size_t i = 0;

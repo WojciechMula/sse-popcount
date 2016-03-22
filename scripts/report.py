@@ -3,6 +3,7 @@ import os.path
 import data
 from table import Table
 from codecs import open
+from collections import OrderedDict
 
 
 TIME_PATTERN = '%0.5f'
@@ -24,6 +25,7 @@ class Report(object):
             'CPU'           : self.options.cpu,
             'COMPILER'      : self.options.compiler,
             'DATE'          : self.options.date,
+            'PROCEDURES'    : self.generate_procedures_descriptions(),
             'TIME_TABLE'    : self.generate_time_table(),
             'TIME_GRAPHS'   : self.generate_time_graphs_per_size(),
             'SPEEDUP_TABLE' : self.generate_speedup_table(),
@@ -125,6 +127,57 @@ class Report(object):
             table.add_row(row)
 
         return table
+
+
+    def generate_procedures_descriptions(self):
+
+        definitions = self.__parse_cpp()
+
+        table = Table()
+        header = ["procedure", "description"]
+        table.set_header(header)
+
+        for proc, desc in definitions.iteritems():
+            if proc in self.data.procedures:
+                table.add_row([proc, desc])
+
+        return table
+
+
+    def __parse_cpp(self):
+        root = os.path.dirname(__file__)
+        src = os.path.join(root, "../function_registry.cpp")
+
+        with open(src) as f:
+            lines = [line.strip() for line in f]
+
+            start = lines.index("// definition start")
+            end   = lines.index("// definition end")
+
+            definitions = lines[start + 1:end]
+            i = 0
+            L = OrderedDict()
+            while i < len(definitions):
+
+                line = definitions[i]
+                if line.startswith("add_trusted("):
+                    name        = line[len("add_trusted("):][1:-2]
+                    description = definitions[i+1][1:-2]
+
+                    L[name] = description
+
+                    i += 2
+                elif line.startswith("add("):
+                    name        = line[len("add("):][1:-2]
+                    description = definitions[i+1][1:-2]
+
+                    L[name] = description
+
+                    i += 2
+                else:
+                    i += 1
+
+            return L
 
 
     def _load_file(self, path):

@@ -16,7 +16,7 @@ do
     $prog  512  10000000 | tee -a $tmp
     $prog 1024   5000000 | tee -a $tmp
     $prog 2048   2500000 | tee -a $tmp
-    $prog 4094   1250000 | tee -a $tmp
+    $prog 4096   1250000 | tee -a $tmp
 done
 
 mv $tmp $result

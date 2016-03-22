@@ -18,7 +18,13 @@ Instruction set: %(ARCHITECTURE)s
 
 Number of runs: %(RUNS)s
 
-All times given in **seconds**.
+All times are given in **seconds**.
+
+
+Procedures
+##############################
+
+%(PROCEDURES)s
 
 
 Running time
