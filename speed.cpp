@@ -204,13 +204,15 @@ void Application::run_procedure(const std::string& name) {
         } \
     }
 
-    RUN("lookup-8",                 popcnt_lookup_8bit)
-    RUN("lookup-64",                popcnt_lookup_64bit);
-    RUN("bit-parallel",             popcnt_parallel_64bit_naive);
-    RUN("bit-parallel-optimized",   popcnt_parallel_64bit_optimized);
-    RUN("harley-seal",              popcnt_harley_seal);
-    RUN("sse-bit-parallel",         popcnt_SSE_bit_parallel);
-    RUN("sse-lookup",               popcnt_SSE_lookup);
+    RUN("lookup-8",                     popcnt_lookup_8bit)
+    RUN("lookup-64",                    popcnt_lookup_64bit);
+    RUN("bit-parallel",                 popcnt_parallel_64bit_naive);
+    RUN("bit-parallel-optimized",       popcnt_parallel_64bit_optimized);
+    RUN("harley-seal",                  popcnt_harley_seal);
+    RUN("sse-bit-parallel",             popcnt_SSE_bit_parallel);
+    RUN("sse-bit-parallel-original",    popcnt_SSE_bit_parallel_original);
+    RUN("sse-lookup",                   popcnt_SSE_lookup);
+    RUN("sse-lookup-original",          popcnt_SSE_lookup_original);
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     RUN("avx2-lookup", popcnt_AVX2_lookup);
