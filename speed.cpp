@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <cassert>
 
 #include <memory>
@@ -21,6 +22,7 @@
 
 #include "sse_operators.cpp"
 #include "popcnt-sse-bit-parallel.cpp"
+#include "popcnt-sse-harley-seal.cpp"
 #include "popcnt-sse-lookup.cpp"
 
 #include "popcnt-cpu.cpp"
@@ -28,6 +30,7 @@
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
+#   include "popcnt-avx2-harley-seal.cpp"
 #endif
 
 #include "function_registry.cpp"
@@ -129,7 +132,7 @@ class Application final {
 
     const CommandLine& cmd;
     const FunctionRegistry& names;
-    std::unique_ptr<uint8_t[]> data;
+    uint8_t* data;
 
     uint64_t count;
     double   time;
@@ -142,6 +145,7 @@ class Application final {
 
 public:
     Application(const CommandLine& cmdline, const FunctionRegistry& names);
+    ~Application();
 
     int run();
 
@@ -157,7 +161,8 @@ private:
 
 Application::Application(const CommandLine& cmdline, const FunctionRegistry& names)
     : cmd(cmdline)
-    , names(names) {}
+    , names(names)
+    , data(nullptr) {}
 
 
 int Application::run() {
@@ -173,7 +178,11 @@ int Application::run() {
 
 void Application::run_procedures() {
 
-    data.reset(new uint8_t[cmd.size]);
+    // GCC parses alignof(), but do not implement it...
+    int result = posix_memalign(reinterpret_cast<void**>(&data), 64, cmd.size);
+    if (result) {
+        throw Error(std::string("posix_memalign failed: ") + strerror(result));
+    }
 
     for (size_t i=0; i < cmd.size; i++) {
         data[i] = i;
@@ -191,6 +200,10 @@ void Application::run_procedures() {
             run_procedure(name);
         }
     }
+}
+
+Application::~Application() {
+    free(data);
 }
 
 void Application::run_procedure(const std::string& name) {
@@ -211,11 +224,13 @@ void Application::run_procedure(const std::string& name) {
     RUN("harley-seal",                  popcnt_harley_seal);
     RUN("sse-bit-parallel",             popcnt_SSE_bit_parallel);
     RUN("sse-bit-parallel-original",    popcnt_SSE_bit_parallel_original);
+    RUN("sse-harley-seal",              popcnt_SSE_harley_seal);
     RUN("sse-lookup",                   popcnt_SSE_lookup);
     RUN("sse-lookup-original",          popcnt_SSE_lookup_original);
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
-    RUN("avx2-lookup", popcnt_AVX2_lookup);
+    RUN("avx2-lookup",      popcnt_AVX2_lookup);
+    RUN("avx2-harley-seal", popcnt_AVX2_harley_seal);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
@@ -252,7 +267,7 @@ Application::Result Application::run(const std::string& name, FN function, doubl
         fflush(stdout);
     } else {
         const auto& dsc = names.get(name);
-        printf("%-30s... ", dsc.name.c_str());
+        printf("%*s ... ", -names.get_widest_name(), dsc.name.c_str());
         fflush(stdout);
     }
 
@@ -261,7 +276,7 @@ Application::Result Application::run(const std::string& name, FN function, doubl
 
     const auto t1 = std::chrono::high_resolution_clock::now();
     while (k-- > 0) {
-        n += function(data.get(), cmd.size);
+        n += function(data, cmd.size);
     }
 
     const auto t2 = std::chrono::high_resolution_clock::now();

@@ -116,6 +116,10 @@ void FunctionRegistry::build() {
         "SSE implementation of bit-parallel-optimized",
         popcnt_SSE_bit_parallel_original);
 
+    add("sse-harley-seal",
+        "SSE implementation of Harley-Seal",
+        popcnt_SSE_harley_seal);
+
     add("sse-lookup",
         "SSSE3 variant using pshufb instruction (unrolled)",
         popcnt_SSE_lookup);
@@ -126,6 +130,10 @@ void FunctionRegistry::build() {
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     add("avx2-lookup",
         "AVX2 variant using pshufb instruction",
+        popcnt_AVX2_lookup);
+
+    add("avx2-harley-seal",
+        "AVX2 implementation of Harley-Seal",
         popcnt_AVX2_lookup);
 #endif
 #if defined(HAVE_POPCNT_INSTRUCTION)
