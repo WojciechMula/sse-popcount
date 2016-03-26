@@ -135,18 +135,20 @@ void FunctionRegistry::build() {
     add("sse-lookup-original",
         "SSSE3 variant using pshufb instruction",
         popcnt_SSE_lookup_original);
+
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     add("avx2-lookup",
-        "AVX2 variant using pshufb instruction",
+        "AVX2 variant using pshufb instruction (unrolled)",
         popcnt_AVX2_lookup);
+
+    add("avx2-lookup-original",
+        "AVX2 variant using pshufb instruction",
+        popcnt_AVX2_lookup_original);
 
     add("avx2-harley-seal",
         "AVX2 implementation of Harley-Seal",
         popcnt_AVX2_harley_seal);
 
-    add("avx2-cpu",
-        "load data with AVX2, then count bit using popcnt",
-        popcnt_AVX2_and_cpu);
 #endif
 #if defined(HAVE_POPCNT_INSTRUCTION)
     add("cpu",
@@ -154,8 +156,14 @@ void FunctionRegistry::build() {
         popcnt_cpu_64bit);
 
     add("sse-cpu",
-        "load data with SSE, then count bit using popcnt",
+        "load data with SSE, then count bits using popcnt",
         popcnt_cpu_64bit);
+
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+    add("avx2-cpu",
+        "load data with AVX2, then count bits using popcnt",
+        popcnt_AVX2_and_cpu);
+#endif
 
     add("builtin-popcnt",
         "builtin for popcnt",
