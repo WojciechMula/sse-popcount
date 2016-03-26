@@ -72,5 +72,14 @@ run_avx: speed_avx
 run_avx2: speed_avx2
 	./speed_avx2_$(COMPILER) $(SIZE) $(ITERS)
 
+run_verify: verify_$(COMPILER)
+	./verify_$(COMPILER)
+
+run_verify_avx: verify_avx_$(COMPILER)
+	./verify_avx_$(COMPILER)
+
+run_verify_avx2: verify_avx2_$(COMPILER)
+	./verify_avx2_$(COMPILER)
+
 clean:
 	rm -f $(ALL_TARGETS)

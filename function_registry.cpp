@@ -121,7 +121,7 @@ void FunctionRegistry::build() {
         popcnt_SSE_bit_parallel_original);
 
     add("sse-bit-parallel-better",
-        "SSE implementation of bit-parralle with fewer instructions",
+        "SSE implementation of bit-parallel with fewer instructions",
         popcnt_SSE_bit_parallel_better);
 
     add("sse-harley-seal",
@@ -142,11 +142,19 @@ void FunctionRegistry::build() {
 
     add("avx2-harley-seal",
         "AVX2 implementation of Harley-Seal",
-        popcnt_AVX2_lookup);
+        popcnt_AVX2_harley_seal);
+
+    add("avx2-cpu",
+        "load data with AVX2, then count bit using popcnt",
+        popcnt_AVX2_and_cpu);
 #endif
 #if defined(HAVE_POPCNT_INSTRUCTION)
     add("cpu",
         "CPU instruction popcnt (64-bit variant)",
+        popcnt_cpu_64bit);
+
+    add("sse-cpu",
+        "load data with SSE, then count bit using popcnt",
         popcnt_cpu_64bit);
 
     add("builtin-popcnt",

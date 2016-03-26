@@ -24,11 +24,13 @@
 #include "popcnt-sse-bit-parallel-better.cpp"
 #include "popcnt-sse-lookup.cpp"
 #include "popcnt-sse-harley-seal.cpp"
+#include "popcnt-sse-cpu.cpp"
 #include "popcnt-cpu.cpp"
 #include "popcnt-builtin.cpp"
 #if defined(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
 #   include "popcnt-avx2-harley-seal.cpp"
+#   include "popcnt-avx2-cpu.cpp"
 #endif
 
 #include "function_registry.cpp"

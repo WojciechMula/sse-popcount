@@ -62,7 +62,7 @@ uint64_t popcnt(const __m256i* data, const uint64_t size)
   total = _mm256_add_epi64(total, popcount(ones));
 
   for(; i < size; i++)
-    total += popcount(data[i]);
+    total = _mm256_add_epi64(total, popcount(data[i]));
 
   return static_cast<uint64_t>(_mm256_extract_epi64(total, 0));
        + static_cast<uint64_t>(_mm256_extract_epi64(total, 1));

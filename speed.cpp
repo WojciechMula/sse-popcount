@@ -25,6 +25,7 @@
 #include "popcnt-sse-bit-parallel-better.cpp"
 #include "popcnt-sse-harley-seal.cpp"
 #include "popcnt-sse-lookup.cpp"
+#include "popcnt-sse-cpu.cpp"
 
 #include "popcnt-cpu.cpp"
 #include "popcnt-builtin.cpp"
@@ -32,6 +33,7 @@
 #if defined(HAVE_AVX2_INSTRUCTIONS)
 #   include "popcnt-avx2-lookup.cpp"
 #   include "popcnt-avx2-harley-seal.cpp"
+#   include "popcnt-avx2-cpu.cpp"
 #endif
 
 #include "function_registry.cpp"
@@ -230,6 +232,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("sse-harley-seal",              popcnt_SSE_harley_seal);
     RUN("sse-lookup",                   popcnt_SSE_lookup);
     RUN("sse-lookup-original",          popcnt_SSE_lookup_original);
+    RUN("sse-cpu",                      popcnt_SSE_and_cpu);
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     RUN("avx2-lookup",      popcnt_AVX2_lookup);
