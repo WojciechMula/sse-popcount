@@ -22,6 +22,7 @@
 
 #include "sse_operators.cpp"
 #include "popcnt-sse-bit-parallel.cpp"
+#include "popcnt-sse-bit-parallel-better.cpp"
 #include "popcnt-sse-harley-seal.cpp"
 #include "popcnt-sse-lookup.cpp"
 
@@ -178,7 +179,7 @@ int Application::run() {
 
 void Application::run_procedures() {
 
-    // GCC parses alignof(), but do not implement it...
+    // GCC parses alignof(), but does not implement it...
     int result = posix_memalign(reinterpret_cast<void**>(&data), 64, cmd.size);
     if (result) {
         throw Error(std::string("posix_memalign failed: ") + strerror(result));
@@ -224,6 +225,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("harley-seal",                  popcnt_harley_seal);
     RUN("sse-bit-parallel",             popcnt_SSE_bit_parallel);
     RUN("sse-bit-parallel-original",    popcnt_SSE_bit_parallel_original);
+    RUN("sse-bit-parallel-better",      popcnt_SSE_bit_parallel_better);
     RUN("sse-harley-seal",              popcnt_SSE_harley_seal);
     RUN("sse-lookup",                   popcnt_SSE_lookup);
     RUN("sse-lookup-original",          popcnt_SSE_lookup_original);

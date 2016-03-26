@@ -116,6 +116,10 @@ void FunctionRegistry::build() {
         "SSE implementation of bit-parallel-optimized",
         popcnt_SSE_bit_parallel_original);
 
+    add("sse-bit-parallel-better",
+        "SSE implementation of bit-parralle with fewer instructions",
+        popcnt_SSE_bit_parallel_better);
+
     add("sse-harley-seal",
         "SSE implementation of Harley-Seal",
         popcnt_SSE_harley_seal);

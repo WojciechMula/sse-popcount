@@ -21,6 +21,7 @@
 
 #include "sse_operators.cpp"
 #include "popcnt-sse-bit-parallel.cpp"
+#include "popcnt-sse-bit-parallel-better.cpp"
 #include "popcnt-sse-lookup.cpp"
 #include "popcnt-sse-harley-seal.cpp"
 #include "popcnt-cpu.cpp"
