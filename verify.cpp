@@ -33,6 +33,10 @@
 #   include "popcnt-avx2-cpu.cpp"
 #endif
 
+#if defined(HAVE_AVX512BW_INSTRUCTIONS)
+#   include "popcnt-avx512-harley-seal.cpp"
+#endif
+
 #include "function_registry.cpp"
 
 // --------------------------------------------------
@@ -152,7 +156,7 @@ void Application::verify(const char* name) {
     const int w = names.get_widest_name();
 
     puts("");
-    printf("test '%s' :\n", name);
+    printf("test '%s':\n", name);
 
     const size_t reference = popcnt_lookup_8bit(data, size);
 
@@ -161,7 +165,7 @@ void Application::verify(const char* name) {
             continue;
         }
 
-        printf("%*s: ", -w, item.name.c_str());
+        printf("%*s : ", -w, item.name.c_str());
         size_t result;
         if (item.function) {
             result = item.function(data, size);

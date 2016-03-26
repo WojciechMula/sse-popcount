@@ -165,6 +165,12 @@ void FunctionRegistry::build() {
         popcnt_AVX2_and_cpu);
 #endif
 
+#if defined(HAVE_AVX512BW_INSTRUCTIONS)
+    add("avx512-harley-seal",
+        "AVX512 implementation of Harley-Seal",
+        popcnt_AVX512_harley_seal);
+#endif
+
     add("builtin-popcnt",
         "builtin for popcnt",
         builtin_popcnt);

@@ -36,6 +36,10 @@
 #   include "popcnt-avx2-cpu.cpp"
 #endif
 
+#if defined(HAVE_AVX2_INSTRUCTIONS)
+#   include "popcnt-avx512-harley-seal.cpp"
+#endif
+
 #include "function_registry.cpp"
 
 // --------------------------------------------------
@@ -239,6 +243,10 @@ void Application::run_procedure(const std::string& name) {
     RUN("avx2-lookup-original", popcnt_AVX2_lookup_original);
     RUN("avx2-harley-seal",     popcnt_AVX2_harley_seal);
     RUN("avx2-cpu",             popcnt_AVX2_and_cpu);
+#endif
+
+#if defined(HAVE_AVX512BW_INSTRUCTIONS)
+    RUN("avx512-harley-seal",   popcnt_AVX512_harley_seal);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)

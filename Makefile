@@ -6,11 +6,13 @@
 
 COMPILER=$(notdir $(CXX))
 FLAGS=-std=c++11 -mpopcnt -O2 -Wall -pedantic -Wextra
+SDE=sde # path to the Intel Software Development Emulator
 
-DEPS=popcnt-*.cpp function_registry.cpp config.h
+DEPS=popcnt-*.cpp function_registry.cpp sse_operators.cpp config.h
 ALL=speed_$(COMPILER) verify_$(COMPILER)
 ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
+ALL_AVX512=speed_avx512_$(COMPILER) verify_avx512_$(COMPILER)
 ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2)
 
 all: $(ALL)
@@ -49,13 +51,21 @@ speed_avx2_$(COMPILER): $(DEPS) speed.cpp
 verify_avx2_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS) -mavx2 -DHAVE_AVX2_INSTRUCTIONS verify.cpp -o $@
 
+speed_avx512_$(COMPILER): $(DEPS) speed.cpp
+	$(CXX) $(FLAGS) -mavx512bw -DHAVE_AVX512BW_INSTRUCTIONS speed.cpp -o $@
+
+verify_avx512_$(COMPILER): $(DEPS) verify.cpp
+	$(CXX) $(FLAGS) -mavx512bw -DHAVE_AVX512BW_INSTRUCTIONS verify.cpp -o $@
+
 speed: speed_$(COMPILER)
 speed_avx: speed_avx_$(COMPILER)
 speed_avx2: speed_avx2_$(COMPILER)
+speed_avx512: speed_avx512_$(COMPILER)
 
 verify: verify_$(COMPILER)
 verify_avx: verify_avx_$(COMPILER)
 verify_avx2: verify_avx2_$(COMPILER)
+verify_avx512: verify_avx512_$(COMPILER)
 
 
 build_all: $(ALL_TARGETS)
@@ -72,14 +82,21 @@ run_avx: speed_avx
 run_avx2: speed_avx2
 	./speed_avx2_$(COMPILER) $(SIZE) $(ITERS)
 
+run_avx512: speed_avx512
+	$(SDE) -cnl -- ./speed_avx512_$(COMPILER) $(SIZE) $(ITERS)
+
 run_verify: verify_$(COMPILER)
-	./verify_$(COMPILER)
+	./$^
 
 run_verify_avx: verify_avx_$(COMPILER)
-	./verify_avx_$(COMPILER)
+	./$^
 
 run_verify_avx2: verify_avx2_$(COMPILER)
-	./verify_avx2_$(COMPILER)
+	./$^
+
+run_verify_avx512: verify_avx512_$(COMPILER)
+    # run via emulator
+	$(SDE) -cnl -- ./$^
 
 clean:
 	rm -f $(ALL_TARGETS)
