@@ -54,7 +54,6 @@ uint64_t popcnt(const __m256i* data, const uint64_t size)
     total = _mm256_add_epi64(total, popcount(sixteens));
   }
 
-
   total = _mm256_slli_epi64(total, 4);     // * 16
   total = _mm256_add_epi64(total, _mm256_slli_epi64(popcount(eights), 3)); // += 8 * ...
   total = _mm256_add_epi64(total, _mm256_slli_epi64(popcount(fours),  2)); // += 4 * ...
@@ -64,9 +63,10 @@ uint64_t popcnt(const __m256i* data, const uint64_t size)
   for(; i < size; i++)
     total = _mm256_add_epi64(total, popcount(data[i]));
 
-  return static_cast<uint64_t>(_mm256_extract_epi64(total, 0));
-       + static_cast<uint64_t>(_mm256_extract_epi64(total, 1));
-       + static_cast<uint64_t>(_mm256_extract_epi64(total, 2));
+
+  return static_cast<uint64_t>(_mm256_extract_epi64(total, 0))
+       + static_cast<uint64_t>(_mm256_extract_epi64(total, 1))
+       + static_cast<uint64_t>(_mm256_extract_epi64(total, 2))
        + static_cast<uint64_t>(_mm256_extract_epi64(total, 3));
 }
 
