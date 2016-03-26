@@ -222,6 +222,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("lookup-64",                    popcnt_lookup_64bit);
     RUN("bit-parallel",                 popcnt_parallel_64bit_naive);
     RUN("bit-parallel-optimized",       popcnt_parallel_64bit_optimized);
+    RUN("bit-parallel-mul",             popcnt_parallel_64bit_mul);
     RUN("harley-seal",                  popcnt_harley_seal);
     RUN("sse-bit-parallel",             popcnt_SSE_bit_parallel);
     RUN("sse-bit-parallel-original",    popcnt_SSE_bit_parallel_original);

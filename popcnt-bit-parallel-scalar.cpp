@@ -66,3 +66,33 @@ std::uint64_t popcnt_parallel_64bit_optimized(const uint8_t* data, const size_t 
 
     return result;
 }
+
+
+// popcnt_mul from popcnt-harley-seal.cpp
+std::uint64_t popcnt_parallel_64bit_mul(const uint8_t* data, const size_t n) {
+    
+    uint64_t result = 0;
+
+    size_t i = 0;
+
+    for (/**/; i < n; i += 8) {
+
+        const uint64_t m1  = UINT64_C(0x5555555555555555);
+        const uint64_t m2  = UINT64_C(0x3333333333333333);
+        const uint64_t m4  = UINT64_C(0x0F0F0F0F0F0F0F0F);
+        const uint64_t h01 = UINT64_C(0x0101010101010101);
+        
+        uint64_t x = *reinterpret_cast<const uint64_t*>(data + i);
+        x -=            (x >> 1)  & m1;
+        x = (x & m2) + ((x >> 2)  & m2);
+        x = (x +        (x >> 4)) & m4;
+
+        result += (x * h01) >> 56;
+    }
+
+    for (/**/; i < n; i++) {
+        result += lookup8bit[data[i]];
+    }
+
+    return result;
+}
