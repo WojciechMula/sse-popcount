@@ -238,6 +238,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("avx2-lookup",          popcnt_AVX2_lookup);
     RUN("avx2-lookup-original", popcnt_AVX2_lookup_original);
     RUN("avx2-harley-seal",     popcnt_AVX2_harley_seal);
+    RUN("avx2-cpu",             popcnt_AVX2_and_cpu);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
