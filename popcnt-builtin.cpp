@@ -160,12 +160,12 @@ uint64_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
     cnt[i] = 0;
   }
 
+  __m128i x0_upper = _mm_setzero_si128();
+  __m128i x1_upper = _mm_setzero_si128();
+
   for (int i = 0; i < len; i+=4) {
     __m128i x0 = _mm_load_si128((__m128i*)&buf[i]);
     __m128i x1 = _mm_load_si128((__m128i*)&buf[i+2]);
-
-    __m128i x0_upper;
-    __m128i x1_upper;
 
     uint64_t dummy0;
     uint64_t dummy1;
@@ -188,7 +188,7 @@ uint64_t builtin_popcnt_movdq_unrolled_manual(const uint64_t* buf, int len) {
 	    "popcnt %9, %9  \n\t"
 	    "add %9, %3     \n\t"
 	    : "+r" (cnt[0]), "+r" (cnt[1]), "+r" (cnt[2]), "+r" (cnt[3]),
-	      "=&r" (dummy0), "=&r" (dummy1),	"=x" (x0_upper), "=x" (x1_upper),
+	      "=&r" (dummy0), "=&r" (dummy1),	"+x" (x0_upper), "+x" (x1_upper),
 	      "=&r" (dummy0_upper), "=&r" (dummy1_upper)
 	    : "x"  (x0), "x"  (x1)
 		);
