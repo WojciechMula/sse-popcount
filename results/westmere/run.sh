@@ -1,6 +1,6 @@
 #!/bin/bash
 
-prog="../../speed --csv"
+prog="../../speed_g++ --csv"
 iters=5
 tmp=tmp.csv
 result=result.csv

@@ -84,7 +84,7 @@ class Report(object):
     def generate_time_table_for_size(self, size):
 
         table = Table()
-        table.set_header(["procedure", "time [s]", "relative time"])
+        table.set_header(["procedure", "time [s]", "relative time (less is better)"])
 
         chars = 50
 

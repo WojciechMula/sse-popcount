@@ -5,7 +5,7 @@ name=haswell-i7-4770-gcc5.3.0-avx2
 python ../../scripts/report.py \
     --csv="$name.csv" \
     --output="$name.rst" \
-    --cpu="Core i7-4770 CPU @ 3.40GHz" \
+    --cpu="Haswell Core i7-4770 CPU @ 3.40GHz" \
     --architecture="AVX2" \
     --compiler="GCC 5.3.0 (Ubuntu)" \
     --runs=5
