@@ -1,4 +1,4 @@
-.PHONY: all build_all x86 avx avx2 help speed verify speed_avx verify_avx speed_avx2 verify_avx2
+.PHONY: all build-all x86 avx avx2 help speed verify speed_avx verify_avx speed_avx2 verify_avx2
 
 # user can do CXX=g++ make
 # It's more fexlible to change from command line
@@ -6,14 +6,15 @@
 
 COMPILER=$(notdir $(CXX))
 FLAGS=-std=c++11 -mpopcnt -O2 -Wall -pedantic -Wextra
-SDE=sde # path to the Intel Software Development Emulator
+SDE=sde # path to the Intel Software Development Emulator, see:
+        # https://software.intel.com/en-us/articles/intel-software-development-emulator
 
 DEPS=popcnt-*.cpp function_registry.cpp sse_operators.cpp config.h
 ALL=speed_$(COMPILER) verify_$(COMPILER)
 ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
 ALL_AVX512=speed_avx512_$(COMPILER) verify_avx512_$(COMPILER)
-ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2)
+ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512)
 
 all: $(ALL)
 
@@ -68,7 +69,7 @@ verify_avx2: verify_avx2_$(COMPILER)
 verify_avx512: verify_avx512_$(COMPILER)
 
 
-build_all: $(ALL_TARGETS)
+build-all: $(ALL_TARGETS)
 
 SIZE=10000000
 ITERS=100
