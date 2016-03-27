@@ -5,6 +5,7 @@
 Sample programs for my article http://0x80.pl/articles/sse-popcount.html
 
 .. image:: https://api.travis-ci.org/Eppie/sse-popcount.svg
+   :target: https://api.travis-ci.org/Eppie/sse-popcount
 
 Introduction
 ------------------------------------------------------------------------
