@@ -1,0 +1,23 @@
+# Use new trusty images, should yield newer compilers and packages
+sudo: required
+dist: precise
+language: cpp
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+
+install:
+  - export CXX=g++-5
+
+script:
+  - make run_verify
+  - make run_verify_avx
+  - make run_verify_avx2
+
