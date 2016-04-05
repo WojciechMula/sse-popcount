@@ -1,0 +1,5 @@
+cpu=Haswell Core i7-4770 CPU @ 3.40GHz
+architecture=AVX2
+compiler=3.8.0-svn257311-1~exp1 (Ubuntu)
+runs=5
+

@@ -2,6 +2,7 @@ import os
 import os.path
 import data
 from table import Table
+from metadata import load_metadata
 from codecs import open
 from collections import OrderedDict
 
@@ -12,18 +13,25 @@ class Report(object):
     def __init__(self, options):
 
         self.options = options
-        with open(options.input, 'rt') as f:
+
+        csv_path      = options.input
+        metadata_path = os.path.splitext(csv_path)[0] + ".metadata"
+
+        with open(csv_path, 'rt') as f:
             self.data = data.ExperimentData(f)
+
+        with open(metadata_path, 'rt') as f:
+            self.metadata = load_metadata(f)
 
 
     def generate_rest(self):
 
         params = {
             'CSV_FILE'      : self.options.input,
-            'ARCHITECTURE'  : self.options.architecture,
-            'RUNS'          : self.options.runs,
-            'CPU'           : self.options.cpu,
-            'COMPILER'      : self.options.compiler,
+            'ARCHITECTURE'  : self.metadata["architecture"],
+            'RUNS'          : self.metadata["runs"],
+            'CPU'           : self.metadata["cpu"],
+            'COMPILER'      : self.metadata["compiler"],
             'DATE'          : self.options.date,
             'PROCEDURES'    : self.generate_procedures_descriptions(),
             'TIME_TABLE'    : self.generate_time_table(),
@@ -227,16 +235,6 @@ def get_options():
                     help="input CSV filename")
     opt.add_option("--output", dest="output", default=default_output,
                     help="output RST filename [default: %s]" % default_output)
-
-    # experiment details
-    opt.add_option("--runs", dest="runs",
-                    help="how many times measurments were repeated")
-    opt.add_option("--cpu", dest="cpu",
-                    help="CPU details")
-    opt.add_option("--compiler", dest="compiler",
-                    help="compiler version")
-    opt.add_option("--architecture", dest="architecture",
-                    help="target architecture (SSE for -msse, AVX2 for -mavx2, etc.)")
 
     # for archivists :)
     opt.add_option("--date", dest="date", default=current_date,

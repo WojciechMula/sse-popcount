@@ -3,27 +3,18 @@ name=sandybridgeE-i7-3930k-g++4.8-avx
 
 python ../../scripts/report.py \
     --csv="$name.csv" \
-    --output="$name.rst" \
-    --cpu="SandyBridge-E Core i7-3930k CPU @ 3.2GHz " \
-    --architecture="AVX" \
-    --compiler="GCC 4.8.5 (Ubuntu)" \
-    --runs=5
-
+    --output="$name.rst"
 
 name=sandybridgeE-i7-3930k-g++5.3-avx
 python ../../scripts/report.py \
     --csv="$name.csv" \
-    --output="$name.rst" \
-    --cpu="SandyBridge-E Core i7-3930k CPU @ 3.2GHz " \
-    --architecture="AVX" \
-    --compiler="GCC 5.3.0 (Ubuntu)" \
-    --runs=5
+    --output="$name.rst"
 
 if type rst2html > /dev/null
 then
-    for src in *.csv
+    for src in *.rst
     do
-        dst=`basename $src .csv`.html
+        dst=`basename $src .rst`.html
         rst2html "$src" > "$dst"
     done
 fi

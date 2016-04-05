@@ -1,0 +1,5 @@
+cpu=SandyBridge-E Core i7-3930k CPU @ 3.2GHz
+architecture=AVX
+compiler=GCC 4.8.5 (Ubuntu)
+runs=5
+
