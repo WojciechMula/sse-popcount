@@ -5,7 +5,7 @@
 # The make builtin rule states CXX to be g++.
 
 COMPILER=$(notdir $(CXX))
-FLAGS=-std=c++11 -mpopcnt -O2 -Wall -pedantic -Wextra
+FLAGS=-std=c++11 -mpopcnt -O2 -Wall -pedantic -Wextra -fabi-version=6
 SDE=sde # path to the Intel Software Development Emulator, see:
         # https://software.intel.com/en-us/articles/intel-software-development-emulator
 
