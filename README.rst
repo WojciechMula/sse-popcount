@@ -7,6 +7,15 @@ Sample programs for my article http://0x80.pl/articles/sse-popcount.html
 .. image:: https://travis-ci.org/WojciechMula/sse-popcount.svg?branch=master
     :target: https://travis-ci.org/WojciechMula/sse-popcount
 
+Paper
+------------------------------------------------------------------------
+
+Daniel Lemire, Nathan Kurz and I published an article
+`Faster Population Counts using AVX2 Instructions`__.
+
+__ https://arxiv.org/abs/1611.07612
+
+
 Introduction
 ------------------------------------------------------------------------
 
