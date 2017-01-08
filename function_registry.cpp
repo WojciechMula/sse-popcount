@@ -112,6 +112,7 @@ void FunctionRegistry::build() {
         "Harley-Seal popcount (4th iteration)",
         popcnt_harley_seal);
 
+#if defined(HAVE_SSE_INSTRUCTIONS)
     add("sse-bit-parallel",
         "SSE implementation of bit-parallel-optimized (unrolled)",
         popcnt_SSE_bit_parallel);
@@ -135,6 +136,7 @@ void FunctionRegistry::build() {
     add("sse-lookup-original",
         "SSSE3 variant using pshufb instruction",
         popcnt_SSE_lookup_original);
+#endif
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     add("avx2-lookup",
@@ -148,8 +150,9 @@ void FunctionRegistry::build() {
     add("avx2-harley-seal",
         "AVX2 implementation of Harley-Seal",
         popcnt_AVX2_harley_seal);
-
 #endif
+
+
 #if defined(HAVE_POPCNT_INSTRUCTION)
     add("cpu",
         "CPU instruction popcnt (64-bit variant)",
@@ -158,6 +161,7 @@ void FunctionRegistry::build() {
     add("sse-cpu",
         "load data with SSE, then count bits using popcnt",
         popcnt_cpu_64bit);
+#endif
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     add("avx2-cpu",
@@ -187,6 +191,7 @@ void FunctionRegistry::build() {
         "unrolled builtin-popcnt32",
         builtin_popcnt_unrolled32);
 
+#if defined(HAVE_POPCNT_INSTRUCTION)
     add("builtin-popcnt-unrolled-errata",
         "unrolled builtin-popcnt avoiding false-dependency",
         builtin_popcnt_unrolled_errata);

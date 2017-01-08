@@ -1,8 +1,3 @@
-#include "config.h"
-
-#include <immintrin.h>
-#include <x86intrin.h>
-
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>

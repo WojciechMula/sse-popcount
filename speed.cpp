@@ -1,8 +1,3 @@
-#include "config.h"
-
-#include <immintrin.h>
-#include <x86intrin.h>
-
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
@@ -207,6 +202,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("bit-parallel-optimized",       popcnt_parallel_64bit_optimized);
     RUN("bit-parallel-mul",             popcnt_parallel_64bit_mul);
     RUN("harley-seal",                  popcnt_harley_seal);
+#if defined(HAVE_SSE_INSTRUCTIONS)
     RUN("sse-bit-parallel",             popcnt_SSE_bit_parallel);
     RUN("sse-bit-parallel-original",    popcnt_SSE_bit_parallel_original);
     RUN("sse-bit-parallel-better",      popcnt_SSE_bit_parallel_better);
@@ -214,6 +210,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("sse-lookup",                   popcnt_SSE_lookup);
     RUN("sse-lookup-original",          popcnt_SSE_lookup_original);
     RUN("sse-cpu",                      popcnt_SSE_and_cpu);
+#endif
 
 #if defined(HAVE_AVX2_INSTRUCTIONS)
     RUN("avx2-lookup",          popcnt_AVX2_lookup);
@@ -242,11 +239,13 @@ void Application::run_procedure(const std::string& name) {
     RUN_BUILTIN("builtin-popcnt32",                         builtin_popcnt32);
     RUN_BUILTIN("builtin-popcnt-unrolled",                  builtin_popcnt_unrolled);
     RUN_BUILTIN("builtin-popcnt-unrolled32",                builtin_popcnt_unrolled32);
+#if defined(HAVE_POPCNT_INSTRUCTION)
     RUN_BUILTIN("builtin-popcnt-unrolled-errata",           builtin_popcnt_unrolled_errata);
     RUN_BUILTIN("builtin-popcnt-unrolled-errata-manual",    builtin_popcnt_unrolled_errata_manual);
     RUN_BUILTIN("builtin-popcnt-movdq",                     builtin_popcnt_movdq);
     RUN_BUILTIN("builtin-popcnt-movdq-unrolled",            builtin_popcnt_movdq_unrolled);
     RUN_BUILTIN("builtin-popcnt-movdq-unrolled_manual",     builtin_popcnt_movdq_unrolled_manual);
+#endif
 }
 
 
