@@ -11,6 +11,7 @@
 
 // --------------------------------------------------
 
+#include "config.h"
 #include "popcnt-all.cpp"
 #include "function_registry.cpp"
 
@@ -227,6 +228,11 @@ void Application::run_procedure(const std::string& name) {
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
     RUN("cpu", popcnt_cpu_64bit);
+#endif
+
+#if defined(HAVE_NEON_INSTRUCTIONS)
+    RUN("neon-vcnt", popcnt_neon_vcnt);
+    RUN("neon-HS",   popcnt_neon_harley_seal);
 #endif
 
 #define RUN_BUILTIN(function_name, function) \

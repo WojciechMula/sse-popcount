@@ -220,7 +220,16 @@ void FunctionRegistry::build() {
         "builtin-popcnt-movdq unrolled (assembly code)",
         builtin_popcnt_movdq_unrolled_manual);
 #endif
-    // definition end
+
+#if defined(HAVE_NEON_INSTRUCTIONS)
+    add("neon-vcnt",
+        "ARM Neon using VCNT",
+        popcnt_neon_vcnt);
+
+    add("neon-HS",
+        "Harley-Seal using Neon VCNT",
+        popcnt_neon_harley_seal);
+#endif
 }
 
 

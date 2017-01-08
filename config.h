@@ -27,3 +27,6 @@
 #   include <immintrin.h>
 #   include <x86intrin.h>
 #endif
+
+#define FORCE_INLINE inline __attribute__((always_inline))
+

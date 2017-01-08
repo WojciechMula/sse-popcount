@@ -28,3 +28,8 @@
 #if defined(HAVE_AVX512BW_INSTRUCTIONS)
 #   include "popcnt-avx512-harley-seal.cpp"
 #endif
+
+#if defined(HAVE_NEON_INSTRUCTIONS)
+#   include "popcnt-neon.cpp"
+#endif
+
