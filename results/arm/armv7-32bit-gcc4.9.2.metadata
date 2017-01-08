@@ -1,0 +1,6 @@
+cpu=ARMv7
+architecture=32-bit
+compiler=GCC 4.9.2 (Linux raspberrypi)
+runs=5
+
+

@@ -230,6 +230,7 @@ void FunctionRegistry::build() {
         "Harley-Seal using Neon VCNT",
         popcnt_neon_harley_seal);
 #endif
+// definition end
 }
 
 
