@@ -201,6 +201,8 @@ void Application::run_procedure(const std::string& name) {
     RUN("bit-parallel",                 popcnt_parallel_64bit_naive);
     RUN("bit-parallel-optimized",       popcnt_parallel_64bit_optimized);
     RUN("bit-parallel-mul",             popcnt_parallel_64bit_mul);
+    RUN("bit-parallel32",               popcnt_parallel_32bit_naive);
+    RUN("bit-parallel-optimized32",     popcnt_parallel_32bit_optimized);
     RUN("harley-seal",                  popcnt_harley_seal);
 #if defined(HAVE_SSE_INSTRUCTIONS)
     RUN("sse-bit-parallel",             popcnt_SSE_bit_parallel);

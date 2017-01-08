@@ -108,6 +108,14 @@ void FunctionRegistry::build() {
         "bit-parallel with fewer instructions",
         popcnt_parallel_64bit_mul);
 
+    add("bit-parallel32",
+        "naive bit parallel method (32 bit)",
+        popcnt_parallel_32bit_naive);
+
+    add("bit-parallel-optimized32",
+        "a bit better bit parallel (32 bit)",
+        popcnt_parallel_32bit_optimized);
+
     add("harley-seal",
         "Harley-Seal popcount (4th iteration)",
         popcnt_harley_seal);

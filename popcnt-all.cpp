@@ -2,6 +2,7 @@
 
 #include "popcnt-lookup.cpp"
 #include "popcnt-bit-parallel-scalar.cpp"
+#include "popcnt-bit-parallel-scalar32.cpp"
 #include "popcnt-harley-seal.cpp"
 #include "popcnt-builtin.cpp"
 
