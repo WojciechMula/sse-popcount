@@ -23,20 +23,27 @@ Subdirectory **original** contains code from 2008 --- it is 32-bit
 and GCC-centric. The **root directory** contains fresh C++11 code,
 written with intrinsics and tested on 64-bit machine.
 
-As usual type ``make`` to compile programs, then you can invoke:
+There are two programs:
 
-* ``verify``/``verify_avx``/``verify_avx2`` --- program tests if all
-  non-lookup implementations counts bits properly.
-* ``speed``/``speed_avx``/``speed_avx2`` --- program tests different
-  implementations of popcount procedure; please read help to find all
-  options (run the program without arguments).
+* ``verify`` --- it tests if all non-lookup implementations counts
+  bits properly;
+* ``speed`` --- benchmarks different implementations of popcount
+  procedure; please read help to find all options (run the program
+  without arguments).
 
-You can also run ``make run``, ``make run_avx`` or ``make run_avx2``
-to run ``speed`` for all available implementations compiled for
-given architecture (more or less: ``-msse``, ``-mavx``, ``-mavx2``).
+There are several targets:
+
+* **default** --- builtin functions, SSE and popcnt instructions;
+* **AVX2** --- all above plus AVX2 implementations;
+* **AVX512BW** --- all above plus experimental AVX512BW code (require
+  software emulator);
+* **arm** --- builtin and ARM Neon implementations.
+
+Type ``make help`` to find out details. To run the default target
+benchamark simply type ``make``.
 
 
-Available implementations in the new version
+Available implementations
 ------------------------------------------------------------------------
 
 +---------------------------------------+------------------------------------------------------------------+
