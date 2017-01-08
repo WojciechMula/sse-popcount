@@ -1,8 +1,13 @@
-.PHONY: all build-all x86 avx avx2 help speed verify speed_avx verify_avx speed_avx2 verify_avx2
-
 # user can do CXX=g++ make
 # It's more fexlible to change from command line
 # The make builtin rule states CXX to be g++.
+.PHONY: all help clean build-all \
+        x86 avx avx2 arm \
+        speed verify \
+        speed_avx verify_avx \
+        speed_avx2 verify_avx2 \
+        speed_avx512bw verify_avx512bw \
+        speed_arm verify_arm
 
 COMPILER=$(notdir $(CXX))
 FLAGS=-std=c++11 -O2 -Wall -pedantic -Wextra -Wfatal-errors
@@ -20,7 +25,7 @@ DEPS=popcnt-*.cpp function_registry.cpp sse_operators.cpp config.h
 ALL=speed_$(COMPILER) verify_$(COMPILER)
 ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
-ALL_AVX512=speed_avx512_$(COMPILER) verify_avx512_$(COMPILER)
+ALL_AVX512BW=speed_avx512bw_$(COMPILER) verify_avx512bw_$(COMPILER)
 ALL_ARM=speed_arm_$(COMPILER) verify_arm_$(COMPILER)
 ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512)
 
@@ -28,16 +33,26 @@ all: $(ALL)
 
 help:
 	@echo "Intel targets:"
-	@echo "x86      - makes programs verify & speed (the default target)"
-	@echo "avx      - makes programs verify_avx & speed_avx"
-	@echo "avx2     - makes programs verify_avx2 & speed_avx2"
-	@echo "run      - runs speed test for x86 code"
-	@echo "run_avx  - runs speed test for AVX code"
-	@echo "run_avx2 - runs speed test for AVX2 code"
+	@echo "x86                  - makes programs verify & speed (the default target)"
+	@echo "run                  - runs benchmark program"
+	@echo "run_verify           - runs verifciation program"
+	@echo
+	@echo "avx                  - makes programs verify_avx & speed_avx"
+	@echo "run_avx              - runs benchmark program"
+	@echo "run_verify_avx       - runs verifciation program"
+	@echo
+	@echo "avx2                 - makes programs verify_avx2 & speed_avx2"
+	@echo "run_avx2             - runs benchmark program"
+	@echo "run_verify_avx2      - runs verifciation program"
+	@echo
+	@echo "avx512bw             - makes programs verify_avx512bw & speed_avx512bw"
+	@echo "run_avx512bw         - runs benchmark program"
+	@echo "run_verify_avx512bw  - runs verifciation program"
 	@echo
 	@echo "ARM Neon target:"
-	@echo "arm      - makes programs verify_arm & speed_arm (using Neon instructions)"
-	@echo "run_arm  - runs speed test for Neon code"
+	@echo "arm                  - makes programs verify_arm & speed_arm (using Neon instructions)"
+	@echo "run_arm              - runs benchmark program"
+	@echo "run_verify_arm       - runs verifciation program"
 
 x86: $(ALL)
 
@@ -46,6 +61,8 @@ avx: $(ALL_AVX)
 avx2: $(ALL_AVX2)
 
 arm: $(ALL_ARM)
+
+avx512bw: $(ALL_AVX512BW)
 
 speed_$(COMPILER): $(DEPS) speed.cpp
 	$(CXX) $(FLAGS_SSE) speed.cpp -o $@
@@ -65,10 +82,10 @@ speed_avx2_$(COMPILER): $(DEPS) speed.cpp
 verify_avx2_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX2) verify.cpp -o $@
 
-speed_avx512_$(COMPILER): $(DEPS) speed.cpp
+speed_avx512bw_$(COMPILER): $(DEPS) speed.cpp
 	$(CXX) $(FLAGS_AVX512BW) speed.cpp -o $@
 
-verify_avx512_$(COMPILER): $(DEPS) verify.cpp
+verify_avx512bw_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX512BW) verify.cpp -o $@
 
 speed_arm_$(COMPILER): $(DEPS) speed.cpp
@@ -80,13 +97,13 @@ verify_arm_$(COMPILER): $(DEPS) verify.cpp
 speed: speed_$(COMPILER)
 speed_avx: speed_avx_$(COMPILER)
 speed_avx2: speed_avx2_$(COMPILER)
-speed_avx512: speed_avx512_$(COMPILER)
+speed_avx512: speed_avx512bw_$(COMPILER)
 speed_arm: speed_arm_$(COMPILER)
 
 verify: verify_$(COMPILER)
 verify_avx: verify_avx_$(COMPILER)
 verify_avx2: verify_avx2_$(COMPILER)
-verify_avx512: verify_avx512_$(COMPILER)
+verify_avx512: verify_avx512bw_$(COMPILER)
 verify_arm: verify_arm_$(COMPILER)
 
 
@@ -105,7 +122,7 @@ run_avx2: speed_avx2
 	./speed_avx2_$(COMPILER) $(SIZE) $(ITERS)
 
 run_avx512: speed_avx512
-	$(SDE) -cnl -- ./speed_avx512_$(COMPILER) $(SIZE) $(ITERS)
+	$(SDE) -cnl -- ./speed_avx512bw_$(COMPILER) $(SIZE) $(ITERS)
 
 SIZE=1000000
 ITERS=100
@@ -122,7 +139,7 @@ run_verify_avx: verify_avx_$(COMPILER)
 run_verify_avx2: verify_avx2_$(COMPILER)
 	./$^
 
-run_verify_avx512: verify_avx512_$(COMPILER)
+run_verify_avx512bw: verify_avx512bw_$(COMPILER)
     # run via emulator
 	$(SDE) -cnl -- ./$^
 
