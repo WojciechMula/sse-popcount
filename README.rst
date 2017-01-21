@@ -59,6 +59,10 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | bit-parallel-mul                      | bit-parallel with fewer instructions                             |
 +---------------------------------------+------------------------------------------------------------------+
+| bit-parallel32                        | naive bit parallel method (32 bit)                               |
++---------------------------------------+------------------------------------------------------------------+
+| bit-parallel-optimized32              | a bit better bit parallel (32 bit)                               |
++---------------------------------------+------------------------------------------------------------------+
 | harley-seal                           | Harley-Seal popcount (4th iteration)                             |
 +---------------------------------------+------------------------------------------------------------------+
 | sse-bit-parallel                      | SSE implementation of bit-parallel-optimized (unrolled)          |
@@ -85,6 +89,8 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | avx2-cpu                              | load data with AVX2, then count bits using popcnt                |
 +---------------------------------------+------------------------------------------------------------------+
+| avx512-harley-seal                    | AVX512 implementation of Harley-Seal                             |
++---------------------------------------+------------------------------------------------------------------+
 | builtin-popcnt                        | builtin for popcnt                                               |
 +---------------------------------------+------------------------------------------------------------------+
 | builtin-popcnt32                      | builtin for popcnt (32-bit variant)                              |
@@ -103,6 +109,10 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | builtin-popcnt-movdq-unrolled_manual  | builtin-popcnt-movdq unrolled (assembly code)                    |
 +---------------------------------------+------------------------------------------------------------------+
+| neon-vcnt                             | ARM Neon using VCNT                                              |
++---------------------------------------+------------------------------------------------------------------+
+| neon-HS                               | Harley-Seal using Neon VCNT                                      |
++---------------------------------------+------------------------------------------------------------------+
 
 
 Acknowledgments
@@ -115,3 +125,14 @@ Acknowledgments
   beats intrinsics in speed and simplicity`__
 
 __ http://danluu.com/assembly-intrinsics/
+
+
+See also
+------------------------------------------------------------------------
+
+* libpopcnt__ --- library by Kim Walisch utilizing methods from our paper.
+
+__ https://github.com/kimwalisch/libpopcnt
+
+
+.. vim: nowrap
