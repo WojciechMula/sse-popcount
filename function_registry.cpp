@@ -183,6 +183,12 @@ void FunctionRegistry::build() {
         popcnt_AVX512_harley_seal);
 #endif
 
+#if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
+    add("avx512-vpopcnt",
+        "AVX512 VPOPCNT",
+        avx512_vpopcnt);
+#endif
+
     add("builtin-popcnt",
         "builtin for popcnt",
         builtin_popcnt);

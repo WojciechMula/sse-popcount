@@ -20,6 +20,8 @@ FLAGS_SSE=$(FLAGS_INTEL) -mssse3 -DHAVE_SSE_INSTRUCTIONS
 FLAGS_AVX=$(FLAGS_INTEL) -mavx -DHAVE_AVX_INSTRUCTIONS
 FLAGS_AVX2=$(FLAGS_INTEL) -mavx2 -DHAVE_AVX_INSTRUCTIONS
 FLAGS_AVX512BW=$(FLAGS_INTEL) -mavx512bw -DHAVE_AVX512BW_INSTRUCTIONS
+# Use the flag -mavx512bw bacuse my current GCC installation doesn't support AVX512 VPOPCNT yet.
+FLAGS_AVX512VPOPCNT=$(FLAGS_INTEL) -mavx512bw -DHAVE_AVX512VPOPCNT_INSTRUCTIONS
 
 DEPS=popcnt-*.cpp function_registry.cpp sse_operators.cpp config.h
 ALL=speed_$(COMPILER) verify_$(COMPILER)
@@ -87,6 +89,9 @@ speed_avx512bw_$(COMPILER): $(DEPS) speed.cpp
 
 verify_avx512bw_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX512BW) verify.cpp -o $@
+
+verify_avx512vpopcnt_$(COMPILER): $(DEPS) verify.cpp
+	$(CXX) $(FLAGS_AVX512VPOPCNT) verify.cpp -o $@
 
 speed_arm_$(COMPILER): $(DEPS) speed.cpp
 	$(CXX) $(FLAGS_ARM) speed.cpp -o $@

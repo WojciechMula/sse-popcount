@@ -1,6 +1,13 @@
 // does your shell supports ansi color seqences?
 #define HAVE_ANSI_CONSOLE 1
 
+#if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
+#   if !defined(HAVE_AVX512BW_INSTRUCTIONS)
+#       define HAVE_AVX512BW_INSTRUCTIONS
+#   endif
+#   define AVX512POPCNT_SW_EMULATOR
+#endif
+
 #if defined(HAVE_AVX512BW_INSTRUCTIONS)
     // AVX512 implies AVX2 & AVX
 #   if !defined(HAVE_AVX_INSTRUCTIONS)
