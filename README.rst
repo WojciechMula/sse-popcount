@@ -37,10 +37,15 @@ There are several targets:
 * **AVX2** --- all above plus AVX2 implementations;
 * **AVX512BW** --- all above plus experimental AVX512BW code (require
   software emulator);
+* **AVX512 VPOPCNT** --- all above plus experimental AVX512 VPOPCNT
+  code (should be compilable with very recent GCC__, software emulator
+  doesn't support this extension yet);
 * **arm** --- builtin and ARM Neon implementations.
 
 Type ``make help`` to find out details. To run the default target
 benchamark simply type ``make``.
+
+__ https://github.com/gcc-mirror/gcc/commit/e0aa57d6b04908affdf4655a6b4a9f2d4d03483b
 
 
 Available implementations
