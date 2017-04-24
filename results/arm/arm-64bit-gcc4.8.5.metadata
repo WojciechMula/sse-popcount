@@ -1,0 +1,5 @@
+cpu=???
+architecture=64-bit
+compiler=GCC 4.8.5 (SUSE Linux)
+runs=5
+

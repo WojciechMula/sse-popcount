@@ -2,7 +2,7 @@
     Population count comparison for ARMv7
 ================================================================================
 
-Generated on: 2017-01-08
+Generated on: 2017-04-24
 
 .. contents:: Contents
 
