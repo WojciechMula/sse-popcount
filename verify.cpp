@@ -67,7 +67,8 @@ int main() {
 
 
 Application::Application(const FunctionRegistry& names)
-    : names(names) {}
+    : names(names)
+    , failed(false) {}
 
 
 bool Application::run() {
