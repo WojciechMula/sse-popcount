@@ -1,5 +1,5 @@
-cpu=???
+cpu=Cortex A57 (AMD Opteron A1100)
 architecture=64-bit
 compiler=GCC 4.8.5 (SUSE Linux)
 runs=5
-
+spec=https://shop.softiron.com/product/overdrive-1000/

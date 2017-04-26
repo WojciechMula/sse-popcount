@@ -1,8 +1,8 @@
 ================================================================================
-    Population count comparison for ???
+    Population count comparison for Cortex A57 (AMD Opteron A1100)
 ================================================================================
 
-Generated on: 2017-04-24
+Generated on: 2017-04-26
 
 .. contents:: Contents
 
@@ -10,7 +10,7 @@ Generated on: 2017-04-24
 Specification
 --------------------------------------------------
 
-CPU: ???
+CPU: Cortex A57 (AMD Opteron A1100)
 
 Compiler: GCC 4.8.5 (SUSE Linux)
 
