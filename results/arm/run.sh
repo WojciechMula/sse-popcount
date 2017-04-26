@@ -1,6 +1,7 @@
 #!/bin/bash
 
 prog="../../speed_arm_g++ --csv"
+#prog="../../speed_aarch64_clang++ --csv"
 iters=5
 tmp=tmp.csv
 result=result.csv

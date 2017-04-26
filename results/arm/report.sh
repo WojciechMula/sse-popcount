@@ -12,6 +12,12 @@ python ../../scripts/report.py \
     --csv="$name.csv" \
     --output="$name.rst"
 
+name=arm-64bit-clang3.8.0
+
+python ../../scripts/report.py \
+    --csv="$name.csv" \
+    --output="$name.rst"
+
 if type rst2html > /dev/null
 then
     for src in *.rst
