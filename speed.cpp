@@ -235,6 +235,10 @@ void Application::run_procedure(const std::string& name) {
     RUN("neon-HS",   popcnt_neon_harley_seal);
 #endif
 
+#if defined(HAVE_AARCH64_ARCHITECTURE)
+    RUN("aarch64-cnt", popcnt_aarch64_cnt);
+#endif
+
 #define RUN_BUILTIN(function_name, function) \
     { \
         auto wrapper = [](const uint8_t* data, size_t size) { \

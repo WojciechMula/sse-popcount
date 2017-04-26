@@ -37,3 +37,7 @@
 #   include "popcnt-neon.cpp"
 #endif
 
+#if defined(HAVE_AARCH64_ARCHITECTURE)
+#   include "popcnt-aarch64.cpp"
+#endif
+

@@ -236,6 +236,12 @@ void FunctionRegistry::build() {
         "Harley-Seal using Neon VCNT",
         popcnt_neon_harley_seal);
 #endif
+
+#if defined(HAVE_AARCH64_ARCHITECTURE)
+    add("aarch64-cnt",
+        "ARMv8 Neon using CNT",
+        popcnt_aarch64_cnt);
+#endif
 // definition end
 }
 
