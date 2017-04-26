@@ -7,7 +7,8 @@
         speed_avx verify_avx \
         speed_avx2 verify_avx2 \
         speed_avx512bw verify_avx512bw \
-        speed_arm verify_arm
+        speed_arm verify_arm \
+        speed_aarch64 verify_aarch64
 
 COMPILER=$(notdir $(CXX))
 FLAGS=-std=c++11 -O2 -Wall -pedantic -Wextra -Wfatal-errors
@@ -15,6 +16,8 @@ SDE=sde # path to the Intel Software Development Emulator, see:
         # https://software.intel.com/en-us/articles/intel-software-development-emulator
 FLAGS_INTEL=$(FLAGS) -mpopcnt -fabi-version=6
 FLAGS_ARM=$(FLAGS) -mfpu=neon -DHAVE_NEON_INSTRUCTIONS
+# It seems that for AArch64 no extra flags are needed (NEON is always available)
+FLAGS_AARCH64=$(FLAGS) -DHAVE_NEON_INSTRUCTIONS -DHAVE_AARCH64_ARCHITECTURE
 
 FLAGS_SSE=$(FLAGS_INTEL) -mssse3 -DHAVE_SSE_INSTRUCTIONS
 FLAGS_AVX=$(FLAGS_INTEL) -mavx -DHAVE_AVX_INSTRUCTIONS
@@ -29,6 +32,7 @@ ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
 ALL_AVX512BW=speed_avx512bw_$(COMPILER) verify_avx512bw_$(COMPILER)
 ALL_ARM=speed_arm_$(COMPILER) verify_arm_$(COMPILER)
+ALL_AARCH64=speed_aarch64_$(COMPILER) verify_aarch64_$(COMPILER)
 ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512)
 
 all: $(ALL)
@@ -63,6 +67,8 @@ avx: $(ALL_AVX)
 avx2: $(ALL_AVX2)
 
 arm: $(ALL_ARM)
+
+aarch64: $(ALL_AARCH64)
 
 avx512bw: $(ALL_AVX512BW)
 
@@ -99,17 +105,25 @@ speed_arm_$(COMPILER): $(DEPS) speed.cpp
 verify_arm_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_ARM) verify.cpp -o $@
 
+speed_aarch64_$(COMPILER): $(DEPS) speed.cpp
+	$(CXX) $(FLAGS_AARCH64) speed.cpp -o $@
+
+verify_aarch64_$(COMPILER): $(DEPS) verify.cpp
+	$(CXX) $(FLAGS_AARCH64) verify.cpp -o $@
+
 speed: speed_$(COMPILER)
 speed_avx: speed_avx_$(COMPILER)
 speed_avx2: speed_avx2_$(COMPILER)
 speed_avx512: speed_avx512bw_$(COMPILER)
 speed_arm: speed_arm_$(COMPILER)
+speed_aarch64: speed_aarch64_$(COMPILER)
 
 verify: verify_$(COMPILER)
 verify_avx: verify_avx_$(COMPILER)
 verify_avx2: verify_avx2_$(COMPILER)
 verify_avx512: verify_avx512bw_$(COMPILER)
 verify_arm: verify_arm_$(COMPILER)
+verify_aarch64: verify_aarch64_$(COMPILER)
 
 
 build-all: $(ALL_TARGETS)
@@ -134,6 +148,9 @@ ITERS=100
 
 run_arm: speed_arm
 	./speed_arm_$(COMPILER) $(SIZE) $(ITERS)
+
+run_aarch64: speed_aarch64
+	./speed_aarch64_$(COMPILER) $(SIZE) $(ITERS)
 
 run_verify: verify_$(COMPILER)
 	./$^
