@@ -21,7 +21,7 @@ Introduction
 
 Subdirectory **original** contains code from 2008 --- it is 32-bit
 and GCC-centric. The **root directory** contains fresh C++11 code,
-written with intrinsics and tested on 64-bit machine.
+written with intrinsics and tested on 64-bit machines.
 
 There are two programs:
 
@@ -96,6 +96,8 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | avx512-harley-seal                    | AVX512 implementation of Harley-Seal                             |
 +---------------------------------------+------------------------------------------------------------------+
+| avx512-vpopcnt                        | AVX512 VPOPCNT                                                   |
++---------------------------------------+------------------------------------------------------------------+
 | builtin-popcnt                        | builtin for popcnt                                               |
 +---------------------------------------+------------------------------------------------------------------+
 | builtin-popcnt32                      | builtin for popcnt (32-bit variant)                              |
@@ -118,6 +120,16 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | neon-HS                               | Harley-Seal using Neon VCNT                                      |
 +---------------------------------------+------------------------------------------------------------------+
+| aarch64-cnt                           | ARMv8 Neon using CNT                                             |
++---------------------------------------+------------------------------------------------------------------+
+
+Performance results
+------------------------------------------------------------------------
+
+The subdirectory results__ contains performance results from various
+computers. If you can, please contribute.
+
+__ results/README.rst
 
 
 Acknowledgments
