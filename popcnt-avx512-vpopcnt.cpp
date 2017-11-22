@@ -1,18 +1,3 @@
-#if defined(AVX512POPCNT_SW_EMULATOR) // waiting for SDE updates
-__m512i _mm512_popcnt_epi64(const __m512i& val) {
-    
-    uint64_t tmp[8] __attribute__((aligned(64)));
-
-    _mm512_store_si512((__m512i*)tmp, val);
-
-    for (int i=0; i < 8; i++) {
-        tmp[i] = _mm_popcnt_u64(tmp[i]);
-    }
-
-    return _mm512_load_si512((__m512i*)tmp);
-}
-#endif
-
 uint64_t avx512_vpopcnt(const uint8_t* data, const size_t size) {
     
     const size_t chunks = size / 64;

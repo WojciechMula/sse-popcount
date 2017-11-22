@@ -5,7 +5,6 @@
 #   if !defined(HAVE_AVX512BW_INSTRUCTIONS)
 #       define HAVE_AVX512BW_INSTRUCTIONS
 #   endif
-#   define AVX512POPCNT_SW_EMULATOR
 #endif
 
 #if defined(HAVE_AVX512BW_INSTRUCTIONS)
