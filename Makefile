@@ -7,6 +7,7 @@
         speed_avx verify_avx \
         speed_avx2 verify_avx2 \
         speed_avx512bw verify_avx512bw \
+        verify_avx512vpopcnt \
         speed_arm verify_arm \
         speed_aarch64 verify_aarch64
 
@@ -31,6 +32,7 @@ ALL=speed_$(COMPILER) verify_$(COMPILER)
 ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
 ALL_AVX512BW=speed_avx512bw_$(COMPILER) verify_avx512bw_$(COMPILER)
+ALL_AVX512VPOPCNT=verify_avx512vpopcnt_$(COMPILER)
 ALL_ARM=speed_arm_$(COMPILER) verify_arm_$(COMPILER)
 ALL_AARCH64=speed_aarch64_$(COMPILER) verify_aarch64_$(COMPILER)
 ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512)
@@ -71,6 +73,8 @@ arm: $(ALL_ARM)
 aarch64: $(ALL_AARCH64)
 
 avx512bw: $(ALL_AVX512BW)
+
+avx512vpopcnt: $(ALL_AVX512VPOPCNT)
 
 speed_$(COMPILER): $(DEPS) speed.cpp
 	$(CXX) $(FLAGS_SSE) speed.cpp -o $@
