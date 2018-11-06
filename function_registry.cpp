@@ -181,6 +181,10 @@ void FunctionRegistry::build() {
     add("avx512-harley-seal",
         "AVX512 implementation of Harley-Seal",
         popcnt_AVX512_harley_seal);
+
+    add("avx512bw-shuf",
+        "AVX512BW implementation uses shuffle instruction",
+        popcnt_AVX512BW_lookup_original);
 #endif
 
 #if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)

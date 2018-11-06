@@ -27,6 +27,7 @@
 
 #if defined(HAVE_AVX512BW_INSTRUCTIONS)
 #   include "popcnt-avx512-harley-seal.cpp"
+#   include "popcnt-avx512bw-lookup.cpp"
 #endif
 
 #if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
