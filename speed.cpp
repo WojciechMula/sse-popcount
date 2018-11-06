@@ -218,6 +218,7 @@ void Application::run_procedure(const std::string& name) {
 
 #if defined(HAVE_AVX512BW_INSTRUCTIONS)
     RUN("avx512-harley-seal",   popcnt_AVX512_harley_seal);
+    RUN("avx512bw-shuf",        popcnt_AVX512BW_lookup_original);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
