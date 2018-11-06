@@ -39,7 +39,7 @@ std::uint64_t popcnt_AVX512BW_lookup_original(const uint8_t* data, const size_t 
         for (int k=0; k < 255/8 && i + 64 < n; k++, i += 64) {
             const __m512i vec = _mm512_loadu_si512(reinterpret_cast<const __m512i*>(data + i));
             const __m512i lo  = _mm512_and_si512(vec, low_mask);
-            const __m512i hi  = _mm512_and_si512(_mm512_srli_epi16(vec, 4), low_mask);
+            const __m512i hi  = _mm512_and_si512(_mm512_srli_epi32(vec, 4), low_mask);
 
             const __m512i popcnt1 = _mm512_shuffle_epi8(lookup, lo);
             const __m512i popcnt2 = _mm512_shuffle_epi8(lookup, hi);
