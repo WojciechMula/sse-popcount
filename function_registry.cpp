@@ -187,6 +187,12 @@ void FunctionRegistry::build() {
         popcnt_AVX512BW_lookup_original);
 #endif
 
+#if defined(HAVE_AVX512VBMI_INSTRUCTIONS)
+    add("avx512vbmi-shuf",
+        "AVX512VBMI implementation uses shuffle instruction",
+        popcnt_AVX512VBMI_lookup);
+#endif
+
 #if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
     add("avx512-vpopcnt",
         "AVX512 VPOPCNT",

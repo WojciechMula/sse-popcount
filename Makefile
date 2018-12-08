@@ -7,6 +7,7 @@
         speed_avx verify_avx \
         speed_avx2 verify_avx2 \
         speed_avx512bw verify_avx512bw \
+        speed_avx512vbmi verify_avx512vbmi \
         verify_avx512vpopcnt \
         speed_arm verify_arm \
         speed_aarch64 verify_aarch64
@@ -24,6 +25,7 @@ FLAGS_SSE=$(FLAGS_INTEL) -mssse3 -DHAVE_SSE_INSTRUCTIONS
 FLAGS_AVX=$(FLAGS_INTEL) -mavx -DHAVE_AVX_INSTRUCTIONS
 FLAGS_AVX2=$(FLAGS_INTEL) -mavx2 -DHAVE_AVX2_INSTRUCTIONS
 FLAGS_AVX512BW=$(FLAGS_INTEL) -mavx512bw -DHAVE_AVX512BW_INSTRUCTIONS
+FLAGS_AVX512VBMI=$(FLAGS_INTEL) -mavx512vbmi -DHAVE_AVX512BW_INSTRUCTIONS -DHAVE_AVX512VBMI_INSTRUCTIONS
 FLAGS_AVX512VPOPCNT=$(FLAGS_INTEL) -mavx512bw -mavx512vpopcntdq -DHAVE_AVX512VPOPCNT_INSTRUCTIONS
 
 DEPS=popcnt-*.cpp function_registry.cpp sse_operators.cpp config.h
@@ -31,6 +33,7 @@ ALL=speed_$(COMPILER) verify_$(COMPILER)
 ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
 ALL_AVX512BW=speed_avx512bw_$(COMPILER) verify_avx512bw_$(COMPILER)
+ALL_AVX512VBMI=speed_avx512vbmi_$(COMPILER) verify_avx512vbmi_$(COMPILER)
 ALL_AVX512VPOPCNT=verify_avx512vpopcnt_$(COMPILER)
 ALL_ARM=speed_arm_$(COMPILER) verify_arm_$(COMPILER)
 ALL_AARCH64=speed_aarch64_$(COMPILER) verify_aarch64_$(COMPILER)
@@ -40,26 +43,30 @@ all: $(ALL)
 
 help:
 	@echo "Intel targets:"
-	@echo "x86                  - makes programs verify & speed (the default target)"
-	@echo "run                  - runs benchmark program"
-	@echo "run_verify           - runs verifciation program"
+	@echo "x86                   - makes programs verify & speed (the default target)"
+	@echo "run                   - runs benchmark program"
+	@echo "run_verify            - runs verification program"
 	@echo
-	@echo "avx                  - makes programs verify_avx & speed_avx"
-	@echo "run_avx              - runs benchmark program"
-	@echo "run_verify_avx       - runs verifciation program"
+	@echo "avx                   - makes programs verify_avx & speed_avx"
+	@echo "run_avx               - runs benchmark program"
+	@echo "run_verify_avx        - runs verification program"
 	@echo
-	@echo "avx2                 - makes programs verify_avx2 & speed_avx2"
-	@echo "run_avx2             - runs benchmark program"
-	@echo "run_verify_avx2      - runs verifciation program"
+	@echo "avx2                  - makes programs verify_avx2 & speed_avx2"
+	@echo "run_avx2              - runs benchmark program"
+	@echo "run_verify_avx2       - runs verification program"
 	@echo
-	@echo "avx512bw             - makes programs verify_avx512bw & speed_avx512bw"
-	@echo "run_avx512bw         - runs benchmark program"
-	@echo "run_verify_avx512bw  - runs verifciation program"
+	@echo "avx512bw              - makes programs verify_avx512bw & speed_avx512bw"
+	@echo "run_avx512bw          - runs benchmark program"
+	@echo "run_verify_avx512bw   - runs verification program"
+	@echo
+	@echo "avx512vbmi            - makes programs verify_avx512vbmi & speed_avx512vbmi"
+	@echo "run_avx512vbmi        - runs benchmark program"
+	@echo "run_verify_avx512vbmi - runs verification program"
 	@echo
 	@echo "ARM Neon target:"
-	@echo "arm                  - makes programs verify_arm & speed_arm (using Neon instructions)"
-	@echo "run_arm              - runs benchmark program"
-	@echo "run_verify_arm       - runs verifciation program"
+	@echo "arm                   - makes programs verify_arm & speed_arm (using Neon instructions)"
+	@echo "run_arm               - runs benchmark program"
+	@echo "run_verify_arm        - runs verification program"
 
 x86: $(ALL)
 
@@ -72,6 +79,8 @@ arm: $(ALL_ARM)
 aarch64: $(ALL_AARCH64)
 
 avx512bw: $(ALL_AVX512BW)
+
+avx512vbmi: $(ALL_AVX512VBMI)
 
 avx512vpopcnt: $(ALL_AVX512VPOPCNT)
 
@@ -99,6 +108,12 @@ speed_avx512bw_$(COMPILER): $(DEPS) speed.cpp
 verify_avx512bw_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX512BW) verify.cpp -o $@
 
+speed_avx512vbmi_$(COMPILER): $(DEPS) speed.cpp
+	$(CXX) $(FLAGS_AVX512VBMI) speed.cpp -o $@
+
+verify_avx512vbmi_$(COMPILER): $(DEPS) verify.cpp
+	$(CXX) $(FLAGS_AVX512VBMI) verify.cpp -o $@
+
 verify_avx512vpopcnt_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX512VPOPCNT) verify.cpp -o $@
 
@@ -117,14 +132,16 @@ verify_aarch64_$(COMPILER): $(DEPS) verify.cpp
 speed: speed_$(COMPILER)
 speed_avx: speed_avx_$(COMPILER)
 speed_avx2: speed_avx2_$(COMPILER)
-speed_avx512: speed_avx512bw_$(COMPILER)
+speed_avx512bw: speed_avx512bw_$(COMPILER)
+speed_avx512vbmi: speed_avx512vbmi_$(COMPILER)
 speed_arm: speed_arm_$(COMPILER)
 speed_aarch64: speed_aarch64_$(COMPILER)
 
 verify: verify_$(COMPILER)
 verify_avx: verify_avx_$(COMPILER)
 verify_avx2: verify_avx2_$(COMPILER)
-verify_avx512: verify_avx512bw_$(COMPILER)
+verify_avx512bw: verify_avx512bw_$(COMPILER)
+verify_avx512vbmi: verify_avx512vbmi_$(COMPILER)
 verify_arm: verify_arm_$(COMPILER)
 verify_aarch64: verify_aarch64_$(COMPILER)
 
@@ -165,6 +182,10 @@ run_verify_avx2: verify_avx2_$(COMPILER)
 	./$^
 
 run_verify_avx512bw: verify_avx512bw_$(COMPILER)
+    # run via emulator
+	$(SDE) -cnl -- ./$^
+
+run_verify_avx512vbmi: verify_avx512vbmi_$(COMPILER)
     # run via emulator
 	$(SDE) -cnl -- ./$^
 

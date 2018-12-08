@@ -30,6 +30,10 @@
 #   include "popcnt-avx512bw-lookup.cpp"
 #endif
 
+#if defined(HAVE_AVX512VBMI_INSTRUCTIONS)
+#   include "popcnt-avx512vbmi-lookup.cpp"
+#endif
+
 #if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
 #   include "popcnt-avx512-vpopcnt.cpp"
 #endif
