@@ -158,8 +158,11 @@ run_avx: speed_avx
 run_avx2: speed_avx2
 	./speed_avx2_$(COMPILER) $(SIZE) $(ITERS)
 
-run_avx512: speed_avx512
+run_avx512bw: speed_avx512bw
 	./speed_avx512bw_$(COMPILER) $(SIZE) $(ITERS)
+
+run_avx512vbmi: speed_avx512vbmi
+	./speed_avx512vbmi_$(COMPILER) $(SIZE) $(ITERS)
 
 SIZE=1000000
 ITERS=100
