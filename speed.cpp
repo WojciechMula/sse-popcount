@@ -221,8 +221,8 @@ void Application::run_procedure(const std::string& name) {
     RUN("avx512bw-shuf",        popcnt_AVX512BW_lookup_original);
 #endif
 
-#if defined(HAVE_AVX512VBMO_INSTRUCTIONS)
-    RUN("avx512vbmi-shuf",      popcnt_AVX512BW_lookup);
+#if defined(HAVE_AVX512VBMI_INSTRUCTIONS)
+    RUN("avx512vbmi-shuf",      popcnt_AVX512VBMI_lookup);
 #endif
 
 #if defined(HAVE_POPCNT_INSTRUCTION)
