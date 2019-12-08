@@ -35,8 +35,8 @@ There are several targets:
 
 * **default** --- builtin functions, SSE and popcnt instructions;
 * **AVX2** --- all above plus AVX2 implementations;
-* **AVX512BW** --- all above plus experimental AVX512BW code (require
-  software emulator);
+* **AVX512BW** --- all above plus experimental AVX512BW code;
+* **AVX512VBMI** --- all above plus experimental AVX512VBMI code;
 * **AVX512 VPOPCNT** --- all above plus experimental AVX512 VPOPCNT
   code (should be compilable with very recent GCC__, software emulator
   doesn't support this extension yet);
@@ -96,6 +96,10 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | avx512-harley-seal                    | AVX512 implementation of Harley-Seal                             |
 +---------------------------------------+------------------------------------------------------------------+
+| avx512bw-shuf                         | AVX512BW implementation uses shuffle instruction                 |
++---------------------------------------+------------------------------------------------------------------+
+| avx512vbmi-shuf                       | AVX512VBMI implementation uses shuffle instruction               |
++---------------------------------------+------------------------------------------------------------------+
 | avx512-vpopcnt                        | AVX512 VPOPCNT                                                   |
 +---------------------------------------+------------------------------------------------------------------+
 | builtin-popcnt                        | builtin for popcnt                                               |
@@ -122,6 +126,7 @@ Available implementations
 +---------------------------------------+------------------------------------------------------------------+
 | aarch64-cnt                           | ARMv8 Neon using CNT                                             |
 +---------------------------------------+------------------------------------------------------------------+
+
 
 Performance results
 ------------------------------------------------------------------------
