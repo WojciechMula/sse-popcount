@@ -14,8 +14,6 @@
 
 COMPILER=$(notdir $(CXX))
 FLAGS=-std=c++11 -O2 -Wall -pedantic -Wextra -Wfatal-errors
-SDE=sde # path to the Intel Software Development Emulator, see:
-        # https://software.intel.com/en-us/articles/intel-software-development-emulator
 FLAGS_INTEL=$(FLAGS) -mpopcnt -fabi-version=6
 FLAGS_ARM=$(FLAGS) -mfpu=neon -DHAVE_NEON_INSTRUCTIONS
 # It seems that for AArch64 no extra flags are needed (NEON is always available)
@@ -161,7 +159,7 @@ run_avx2: speed_avx2
 	./speed_avx2_$(COMPILER) $(SIZE) $(ITERS)
 
 run_avx512: speed_avx512
-	$(SDE) -cnl -- ./speed_avx512bw_$(COMPILER) $(SIZE) $(ITERS)
+	./speed_avx512bw_$(COMPILER) $(SIZE) $(ITERS)
 
 SIZE=1000000
 ITERS=100
@@ -182,12 +180,10 @@ run_verify_avx2: verify_avx2_$(COMPILER)
 	./$^
 
 run_verify_avx512bw: verify_avx512bw_$(COMPILER)
-    # run via emulator
-	$(SDE) -cnl -- ./$^
+	./$^
 
 run_verify_avx512vbmi: verify_avx512vbmi_$(COMPILER)
-    # run via emulator
-	$(SDE) -cnl -- ./$^
+	./$^
 
 run_verify_arm: verify_arm_$(COMPILER)
 	./$^
