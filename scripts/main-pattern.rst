@@ -10,7 +10,7 @@ Generated on: %(DATE)s
 Specification
 --------------------------------------------------
 
-CPU: %(CPU)s
+CPU: %(CPU_DETAILS)s
 
 Compiler: %(COMPILER)s
 

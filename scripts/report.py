@@ -27,11 +27,17 @@ class Report(object):
 
     def generate_rest(self):
 
+        if 'cpu_url' in self.metadata:
+            cpu = '`%s <%s>`_' % (self.metadata['cpu'], self.metadata['cpu_url'])
+        else:
+            cpu = self.metadata['cpu']
+
         params = {
             'CSV_FILE'      : self.options.input,
             'ARCHITECTURE'  : self.metadata["architecture"],
             'RUNS'          : self.metadata["runs"],
             'CPU'           : self.metadata["cpu"],
+            'CPU_DETAILS'   : cpu,
             'COMPILER'      : self.metadata["compiler"],
             'DATE'          : self.options.date,
             'PROCEDURES'    : self.generate_procedures_descriptions(),

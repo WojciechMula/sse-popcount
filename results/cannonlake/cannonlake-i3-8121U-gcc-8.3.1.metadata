@@ -1,0 +1,5 @@
+cpu=Cannon Lake Core i3-8121U @ 2.20 GHz
+cpu_url=https://ark.intel.com/content/www/us/en/ark/products/136863/intel-core-i3-8121u-processor-4m-cache-up-to-3-20-ghz.html
+architecture=AVX512VBMI
+compiler=gcc version 8.3.1 20190311 (Red Hat 8.3.1-3)
+runs=5
