@@ -33,7 +33,7 @@ class Report(object):
             cpu = self.metadata['cpu']
 
         params = {
-            'CSV_FILE'      : self.options.input,
+            'CSV_FILE'      : os.path.basename(self.options.input),
             'ARCHITECTURE'  : self.metadata["architecture"],
             'RUNS'          : self.metadata["runs"],
             'CPU'           : self.metadata["cpu"],

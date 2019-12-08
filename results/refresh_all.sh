@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for dir in haswell skylake westmere sandybridge-e bulldozer
+for dir in *
 do
-    cd $dir
-    ./report.sh
-    cd ..
+    if [[ -d ${dir} ]]; then
+        ./report.sh ${dir}
+    fi
 done
