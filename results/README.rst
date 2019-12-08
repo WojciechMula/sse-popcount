@@ -6,6 +6,10 @@
 
   * `GCC 8.3.1`__
 
+* Skylake-X:
+
+  * `GCC 8.1.0`__
+
 * Skylake:
 
   * `Clang 3.8.0`__
@@ -39,6 +43,7 @@
   * `Clang 3.8.0`__
 
 __ cannonlake/cannonlake-i3-8121U-gcc-8.3.1.rst
+__ skylake-x/skylake-x-w-2104.rst
 __ skylake/skylake-i7-6700-clang3.8.0-avx2.rst
 __ skylake/skylake-i7-6700-gcc5.3.0-avx2.rst
 __ haswell/haswell-i7-4770-gcc5.3.0-avx2.rst

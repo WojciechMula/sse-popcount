@@ -1,0 +1,5 @@
+cpu=Xeon W-2104 CPU @ 3.20GHz
+cpu_url=https://ark.intel.com/content/www/us/en/ark/products/125039/intel-xeon-w-2104-processor-8-25m-cache-3-20-ghz.html
+architecture=AVX512BW
+compiler=gcc version 8.1.0 (Ubuntu 8.1.0-5ubuntu1~16.04)
+runs=5
