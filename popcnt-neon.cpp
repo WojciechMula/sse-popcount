@@ -1,48 +1,71 @@
 
+FORCE_INLINE uint64x2_t vpadalq(uint64x2_t sum, uint8x16_t t)
+{
+  return vpadalq_u32(sum, vpaddlq_u16(vpaddlq_u8(t)));
+}
+
+
 uint64_t popcnt_neon_vcnt(const uint8_t* data, const size_t size)
 {
-    const size_t chunk_size = 16 * 4 * 2;
+  uint64_t i = 0;
+  uint64_t cnt = 0;
+  uint64_t chunk_size = 64;
 
-    uint8_t* ptr = const_cast<uint8_t*>(data);
+  if (size >= chunk_size)
+  {
+    uint64_t iters = size / chunk_size;
+    const uint8_t* ptr = (const uint8_t*) data;
+    uint64x2_t sum = vcombine_u64(vcreate_u64(0), vcreate_u64(0));
+    uint8x16_t zero = vcombine_u8(vcreate_u8(0), vcreate_u8(0));
 
-    const size_t n = size / chunk_size;
-    const size_t k = size % chunk_size;
+    do
+    {
+      uint8x16_t t0 = zero;
+      uint8x16_t t1 = zero;
+      uint8x16_t t2 = zero;
+      uint8x16_t t3 = zero;
 
-    uint32x4_t sum = vcombine_u32(vcreate_u32(0), vcreate_u32(0));
+      /*
+       * After every 31 iterations we need to add the
+       * temporary sums (t0, t1, t2, t3) to the total sum.
+       * We must ensure that the temporary sums <= 255
+       * and 31 * 8 bits = 248 which is OK.
+       */
+      uint64_t limit = (i + 31 < iters) ? i + 31 : iters;
 
-    for (size_t i=0; i < n; i++, ptr += chunk_size) {
+      /* Each iteration processes 64 bytes */
+      for (; i < limit; i++)
+      {
+        uint8x16x4_t input = vld4q_u8(ptr);
+        ptr += chunk_size;
 
-        uint8x16x4_t input0 = vld4q_u8(ptr + 0 * 16 * 4);
-        uint8x16x4_t input1 = vld4q_u8(ptr + 1 * 16 * 4);
+        t0 = vaddq_u8(t0, vcntq_u8(input.val[0]));
+        t1 = vaddq_u8(t1, vcntq_u8(input.val[1]));
+        t2 = vaddq_u8(t2, vcntq_u8(input.val[2]));
+        t3 = vaddq_u8(t3, vcntq_u8(input.val[3]));
+      }
 
-        uint8x16_t t0   = vcntq_u8(input0.val[0]);
-        t0 = vaddq_u8(t0, vcntq_u8(input0.val[1]));
-        t0 = vaddq_u8(t0, vcntq_u8(input0.val[2]));
-        t0 = vaddq_u8(t0, vcntq_u8(input0.val[3]));
-
-        t0 = vaddq_u8(t0, vcntq_u8(input1.val[0]));
-        t0 = vaddq_u8(t0, vcntq_u8(input1.val[1]));
-        t0 = vaddq_u8(t0, vcntq_u8(input1.val[2]));
-        t0 = vaddq_u8(t0, vcntq_u8(input1.val[3]));
-
-        const uint16x8_t t1 = vpaddlq_u8(t0);
-
-        sum = vpadalq_u16(sum, t1);
+      sum = vpadalq(sum, t0);
+      sum = vpadalq(sum, t1);
+      sum = vpadalq(sum, t2);
+      sum = vpadalq(sum, t3);
     }
+    while (i < iters);
 
-    uint32_t scalar = 0;
-    uint32_t tmp[4];
+    uint64_t tmp[2];
+    vst1q_u64(tmp, sum);
+    cnt += tmp[0];
+    cnt += tmp[1];
 
-    vst1q_u32(tmp, sum);
-    for (int i=0; i < 4; i++) {
-        scalar += tmp[i];
-    }
+    /* Convert back to byte index */
+    i *= chunk_size;
+  }
 
-    for (size_t j=0; j < k; j++) {
-        scalar += lookup8bit[ptr[j]];
-    }
+  for (; i < size; i++) {
+    cnt += lookup8bit[data[i]];
+  }
 
-    return scalar;
+  return cnt;
 }
 
 
