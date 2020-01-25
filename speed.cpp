@@ -195,6 +195,7 @@ void Application::run_procedure(const std::string& name) {
     RUN("lookup-64",                    popcnt_lookup_64bit);
     RUN("bit-parallel",                 popcnt_parallel_64bit_naive);
     RUN("bit-parallel-optimized",       popcnt_parallel_64bit_optimized);
+    RUN("bit-parallel-optimized2",      popcnt_parallel_64bit_optimized2);
     RUN("bit-parallel-mul",             popcnt_parallel_64bit_mul);
     RUN("bit-parallel32",               popcnt_parallel_32bit_naive);
     RUN("bit-parallel-optimized32",     popcnt_parallel_32bit_optimized);

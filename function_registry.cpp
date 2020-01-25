@@ -104,6 +104,10 @@ void FunctionRegistry::build() {
         "a bit better bit parallel",
         popcnt_parallel_64bit_optimized);
 
+    add("bit-parallel-optimized2",
+        "a bit better bit parallel (v2)",
+        popcnt_parallel_64bit_optimized2);
+
     add("bit-parallel-mul",
         "bit-parallel with fewer instructions",
         popcnt_parallel_64bit_mul);

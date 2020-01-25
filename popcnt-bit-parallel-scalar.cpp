@@ -96,3 +96,79 @@ std::uint64_t popcnt_parallel_64bit_mul(const uint8_t* data, const size_t n) {
 
     return result;
 }
+
+
+std::uint64_t popcnt_parallel_64bit_optimized2(const uint8_t* data, const size_t n) {
+
+    uint64_t result = 0;
+
+    size_t i = 0;
+
+    while (i + 7*8 <= n) {
+        const uint64_t in0 = *reinterpret_cast<const uint64_t*>(data + i + 8*0);
+        const uint64_t in1 = *reinterpret_cast<const uint64_t*>(data + i + 8*1);
+        const uint64_t in2 = *reinterpret_cast<const uint64_t*>(data + i + 8*2);
+        const uint64_t in3 = *reinterpret_cast<const uint64_t*>(data + i + 8*3);
+        const uint64_t in4 = *reinterpret_cast<const uint64_t*>(data + i + 8*4);
+        const uint64_t in5 = *reinterpret_cast<const uint64_t*>(data + i + 8*5);
+        const uint64_t in6 = *reinterpret_cast<const uint64_t*>(data + i + 8*6);
+        i += 7*8;
+
+        // 2-bit sums (we sum three 1-bit numbers: 3*1 = 2^2 - 1)
+        const uint64_t a0 = in0 & 0x5555555555555555llu;
+        const uint64_t a1 = (in0 >> 1) & 0x5555555555555555llu;
+        const uint64_t a2 = in1 & 0x5555555555555555llu;
+        const uint64_t A0 = (a0 + a1 + a2);
+
+        const uint64_t a3 = (in1 >> 1) & 0x5555555555555555llu;
+        const uint64_t a4 = in2 & 0x5555555555555555llu;
+        const uint64_t a5 = (in2 >> 1) & 0x5555555555555555llu;
+        const uint64_t A1 = (a3 + a4 + a5);
+
+        const uint64_t a6 = in3 & 0x5555555555555555llu;
+        const uint64_t a7 = (in3 >> 1) & 0x5555555555555555llu;
+        const uint64_t a8 = in4 & 0x5555555555555555llu;
+        const uint64_t A2 = (a6 + a7 + a8);
+
+        const uint64_t a9 = (in4 >> 1) & 0x5555555555555555llu;
+        const uint64_t a10 = in5 & 0x5555555555555555llu;
+        const uint64_t a11 = (in5 >> 1) & 0x5555555555555555llu;
+        const uint64_t A3 = (a9 + a10 + a11);
+
+        const uint64_t a12 = in6 & 0x5555555555555555llu;
+        const uint64_t a13 = (in6 >> 1) & 0x5555555555555555llu;
+        const uint64_t A4 = (a12 + a13 + 0);
+
+        // 4-bit sums (we sum five 2-bit numbers: 5*3 = 15 = 2^4 - 1
+        const uint64_t b0 = A0 & 0x3333333333333333llu;
+        const uint64_t b1 = (A0 >> 2) & 0x3333333333333333llu;
+        const uint64_t b2 = A1 & 0x3333333333333333llu;
+        const uint64_t b3 = (A1 >> 2) & 0x3333333333333333llu;
+        const uint64_t b4 = A2 & 0x3333333333333333llu;
+        const uint64_t b5 = (A2 >> 2) & 0x3333333333333333llu;
+        const uint64_t b6 = A3 & 0x3333333333333333llu;
+        const uint64_t b7 = (A3 >> 2) & 0x3333333333333333llu;
+        const uint64_t b8 = A4 & 0x3333333333333333llu;
+        const uint64_t b9 = (A4 >> 2) & 0x3333333333333333llu;
+
+        const uint64_t B0 = (b0 + b1 + b2 + b3 + b4);
+        const uint64_t B1 = (b5 + b6 + b7 + b8 + b9);
+
+        // horiz sum of 4-bit values
+        const uint64_t hsum = 0x0101010101010101llu;
+
+        const uint64_t c0 = B0 & 0x0f0f0f0f0f0f0f0fllu;
+        const uint64_t c1 = (B0 >> 4) & 0x0f0f0f0f0f0f0f0fllu;
+        const uint64_t c2 = B1 & 0x0f0f0f0f0f0f0f0fllu;
+        const uint64_t c3 = (B1 >> 4) & 0x0f0f0f0f0f0f0f0fllu;
+
+        result += ((c0 + c1) * hsum) >> 56;
+        result += ((c2 + c3) * hsum) >> 56;
+    }
+
+    for (/**/; i < n; i++) {
+        result += lookup8bit[data[i]];
+    }
+
+    return result;
+}
