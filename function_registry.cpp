@@ -105,7 +105,7 @@ void FunctionRegistry::build() {
         popcnt_parallel_64bit_optimized);
 
     add("bit-parallel-optimized2",
-        "a bit better bit parallel (v2)",
+        "better utilization of 2- and 4-bit subwords",
         popcnt_parallel_64bit_optimized2);
 
     add("bit-parallel-mul",
