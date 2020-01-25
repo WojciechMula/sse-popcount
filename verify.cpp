@@ -42,8 +42,7 @@ public:
     bool run();
 
 private:
-    void run_all_zeros();
-    void run_all_ones();
+    void run_const_val(const char* name, uint8_t val);
     void run_ascending();
     void run_quasirandom();
     void verify(const char* name);
@@ -73,8 +72,16 @@ Application::Application(const FunctionRegistry& names)
 
 bool Application::run() {
 
-    run_all_zeros();
-    run_all_ones();
+    run_const_val("all zeros", 0x00);
+    run_const_val("all ones", 0xff);
+    run_const_val("single bit (0x01)", 0x01);
+    run_const_val("single bit (0x02)", 0x02);
+    run_const_val("single bit (0x04)", 0x04);
+    run_const_val("single bit (0x08)", 0x08);
+    run_const_val("single bit (0x10)", 0x10);
+    run_const_val("single bit (0x20)", 0x20);
+    run_const_val("single bit (0x40)", 0x40);
+    run_const_val("single bit (0x80)", 0x80);
     run_ascending();
     run_quasirandom();
 
@@ -82,23 +89,13 @@ bool Application::run() {
 }
 
 
-void Application::run_all_zeros() {
+void Application::run_const_val(const char* name, uint8_t val) {
 
     for (size_t i=0; i < size; i++) {
-        data[i] = 0;
+        data[i] = val;
     }
 
-    verify("all zeros");
-}
-
-
-void Application::run_all_ones() {
-
-    for (size_t i=0; i < size; i++) {
-        data[i] = 1;
-    }
-
-    verify("all ones");
+    verify(name);
 }
 
 
