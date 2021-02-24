@@ -1,0 +1,6 @@
+cpu=Cascade Lake Xeon Gold 6240 @ 2.6 GHz
+cpu_url=https://ark.intel.com/content/www/es/es/ark/products/192443/intel-xeon-gold-6240-processor-24-75m-cache-2-60-ghz.html
+architecture=AVX512BW
+compiler=gcc version 8.3.0 (crosstool-NG 1.24.0)
+runs=5
+
