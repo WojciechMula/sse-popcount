@@ -1,5 +1,5 @@
 ================================================================================
-    Population count comparison for Cascade Lake Xeon E5-2623 v3 @ 3.0 GHz
+    Population count comparison for Cascade Lake Xeon Gold 6240 @ 2.6 GHz
 ================================================================================
 
 Generated on: 2021-02-24
@@ -10,7 +10,7 @@ Generated on: 2021-02-24
 Specification
 --------------------------------------------------
 
-CPU: `Cascade Lake Xeon E5-2623 v3 @ 3.0 GHz <https://ark.intel.com/content/www/es/es/ark/products/83354/intel-xeon-processor-e5-2623-v3-10m-cache-3-00-ghz.html>`_
+CPU: `Cascade Lake Xeon Gold 6240 @ 2.6 GHz <https://ark.intel.com/content/www/es/es/ark/products/192443/intel-xeon-gold-6240-processor-24-75m-cache-2-60-ghz.html>`_
 
 Compiler: gcc version 8.3.0 (crosstool-NG 1.24.0)
 
@@ -826,4 +826,4 @@ Speedup
 CSV file
 --------------------------------------------------
 
-Download `cascadelake-E5-2623-v3-gcc-8.3.0.csv <cascadelake-E5-2623-v3-gcc-8.3.0.csv>`_
+Download `cascadelake-Xeon-Gold-6240-gcc-8.3.0.csv <cascadelake-Xeon-Gold-6240-gcc-8.3.0.csv>`_

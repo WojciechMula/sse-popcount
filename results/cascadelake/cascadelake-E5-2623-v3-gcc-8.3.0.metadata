@@ -1,6 +1,0 @@
-cpu=Cascade Lake Xeon E5-2623 v3 @ 3.0 GHz
-cpu_url=https://ark.intel.com/content/www/es/es/ark/products/83354/intel-xeon-processor-e5-2623-v3-10m-cache-3-00-ghz.html
-architecture=AVX512BW
-compiler=gcc version 8.3.0 (crosstool-NG 1.24.0)
-runs=5
-

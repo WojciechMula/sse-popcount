@@ -47,7 +47,7 @@
   * `Clang 3.8.0`__
 
 __ cannonlake/cannonlake-i3-8121U-gcc-8.3.1.rst
-__ cascadelake/cascadelake-E5-2623-v3-gcc-8.3.0.rst
+__ cascadelake/cascadelake-Xeon-Gold-6240-gcc-8.3.0.rst
 __ skylake-x/skylake-x-w-2104-gcc8.1.0.rst
 __ skylake/skylake-i7-6700-clang3.8.0-avx2.rst
 __ skylake/skylake-i7-6700-gcc5.3.0-avx2.rst
