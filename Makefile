@@ -13,7 +13,7 @@
         speed_aarch64 verify_aarch64
 
 COMPILER=$(notdir $(CXX))
-FLAGS=-std=c++11 -O2 -Wall -pedantic -Wextra -Wfatal-errors
+FLAGS=-std=c++17 -O2 -Wall -pedantic -Wextra -Wfatal-errors
 FLAGS_INTEL=$(FLAGS) -mpopcnt -fabi-version=6
 FLAGS_ARM=$(FLAGS) -mfpu=neon -DHAVE_NEON_INSTRUCTIONS
 # It seems that for AArch64 no extra flags are needed (NEON is always available)
