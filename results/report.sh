@@ -25,7 +25,7 @@ if [[ ! -f $SCRIPT ]]; then
     exit 1
 fi
 
-REPORT="python ${SCRIPT}"
+REPORT="python2 ${SCRIPT}"
 
 for file in ${DIR}/*.metadata
 do
