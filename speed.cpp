@@ -2,6 +2,7 @@
 
 #include <set>
 #include <chrono>
+#include <cstdlib>
 
 // --------------------------------------------------
 
@@ -106,7 +107,7 @@ class Application final {
 
     const CommandLine& cmd;
     const FunctionRegistry& names;
-    uint8_t* data;
+    std::uint8_t* data __attribute__((aligned(64)));
 
     uint64_t count;
     double   time;
@@ -149,6 +150,14 @@ int Application::run() {
 
     return 0;
 }
+
+#ifndef posix_memalign
+int posix_memalign(void** data, size_t align, size_t size)
+{
+	*data = _aligned_malloc(align, size);
+	return data == nullptr ? 12 : 0;
+}
+#endif
 
 void Application::run_procedures() {
 
@@ -267,7 +276,7 @@ Application::Result Application::run(const std::string& name, FN function, doubl
     Result result;
 
     if (cmd.print_csv) {
-        printf("%s, %lu, %lu, ", name.c_str(), cmd.size, cmd.iteration_count);
+        printf("%s, %llu, %llu, ", name.c_str(), cmd.size, cmd.iteration_count);
         fflush(stdout);
     } else {
         const auto& dsc = names.get(name);
@@ -299,11 +308,13 @@ Application::Result Application::run(const std::string& name, FN function, doubl
             printf(" (speedup: %3.2f)", speedup);
         }
 
-        putchar('\n');
+        printf("\n");
     }
 
     result.count = n; // to prevent compiler from optimizing out the loop
     result.time  = td.count();
+	
+	fflush(stdout);
 
     return result;
 }
