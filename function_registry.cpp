@@ -200,7 +200,7 @@ void FunctionRegistry::build() {
 #if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
     add("avx512-vpopcnt",
         "AVX512 VPOPCNT",
-        avx512_vpopcnt);
+        popcnt_AVX512_vpopcnt);
 #endif
 
     add("builtin-popcnt",

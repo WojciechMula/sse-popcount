@@ -248,6 +248,10 @@ void Application::run_procedure(const std::string& name) {
     RUN("avx512vbmi-shuf",      popcnt_AVX512VBMI_lookup);
 #endif
 
+#if defined(HAVE_AVX512VPOPCNT_INSTRUCTIONS)
+    RUN("avx512-vpopcnt",       popcnt_AVX512_vpopcnt);
+#endif
+
 #if defined(HAVE_POPCNT_INSTRUCTION)
     RUN("cpu", popcnt_cpu_64bit);
 #endif

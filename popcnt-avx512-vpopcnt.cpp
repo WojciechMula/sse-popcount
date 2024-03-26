@@ -1,4 +1,4 @@
-uint64_t avx512_vpopcnt(const uint8_t* data, const size_t size) {
+std::uint64_t popcnt_AVX512_vpopcnt(const uint8_t* data, const size_t size) {
     
     const size_t chunks = size / 64;
 
