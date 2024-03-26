@@ -146,7 +146,7 @@ void Application::verify(const char* name) {
             puts("OK", GREEN);
         } else {
             puts("ERROR", RED);
-            printf("result = %llu, reference = %llu\n", result, reference);
+            printf("result = %zu, reference = %zu\n", result, reference);
             failed = true;
         }
     }

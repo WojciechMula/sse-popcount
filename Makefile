@@ -8,7 +8,7 @@
         speed_avx2 verify_avx2 \
         speed_avx512bw verify_avx512bw \
         speed_avx512vbmi verify_avx512vbmi \
-        verify_avx512vpopcnt \
+        speed_avx512vpopcnt verify_avx512vpopcnt \
         speed_arm verify_arm \
         speed_aarch64 verify_aarch64
 
@@ -32,7 +32,7 @@ ALL_AVX=speed_avx_$(COMPILER) verify_avx_$(COMPILER)
 ALL_AVX2=speed_avx2_$(COMPILER) verify_avx2_$(COMPILER)
 ALL_AVX512BW=speed_avx512bw_$(COMPILER) verify_avx512bw_$(COMPILER)
 ALL_AVX512VBMI=speed_avx512vbmi_$(COMPILER) verify_avx512vbmi_$(COMPILER)
-ALL_AVX512VPOPCNT=verify_avx512vpopcnt_$(COMPILER)
+ALL_AVX512VPOPCNT=speed_avx512vpopcnt_$(COMPILER) verify_avx512vpopcnt_$(COMPILER)
 ALL_ARM=speed_arm_$(COMPILER) verify_arm_$(COMPILER)
 ALL_AARCH64=speed_aarch64_$(COMPILER) verify_aarch64_$(COMPILER)
 ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512) $(ALL_AVX512BW) $(ALL_AVX512VPOPCNT)
@@ -60,6 +60,10 @@ help:
 	@echo "avx512vbmi            - makes programs verify_avx512vbmi & speed_avx512vbmi"
 	@echo "run_avx512vbmi        - runs benchmark program"
 	@echo "run_verify_avx512vbmi - runs verification program"
+	@echo
+	@echo "avx512vpopcnt            - makes programs verify_avx512vpopcnt & speed_avx512vpopcnt"
+	@echo "run_avx512vpopcnt        - runs benchmark program"
+	@echo "run_verify_avx512vpopcnt - runs verification program"
 	@echo
 	@echo "ARM Neon target:"
 	@echo "arm                   - makes programs verify_arm & speed_arm (using Neon instructions)"
@@ -112,6 +116,9 @@ speed_avx512vbmi_$(COMPILER): $(DEPS) speed.cpp
 verify_avx512vbmi_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX512VBMI) verify.cpp -o $@
 
+speed_avx512vpopcnt_$(COMPILER): $(DEPS) speed.cpp
+	$(CXX) $(FLAGS_AVX512VPOPCNT) speed.cpp -o $@
+
 verify_avx512vpopcnt_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AVX512VPOPCNT) verify.cpp -o $@
 
@@ -132,6 +139,7 @@ speed_avx: speed_avx_$(COMPILER)
 speed_avx2: speed_avx2_$(COMPILER)
 speed_avx512bw: speed_avx512bw_$(COMPILER)
 speed_avx512vbmi: speed_avx512vbmi_$(COMPILER)
+speed_avx512vpopcnt: speed_avx512vpopcnt_$(COMPILER)
 speed_arm: speed_arm_$(COMPILER)
 speed_aarch64: speed_aarch64_$(COMPILER)
 
@@ -140,6 +148,7 @@ verify_avx: verify_avx_$(COMPILER)
 verify_avx2: verify_avx2_$(COMPILER)
 verify_avx512bw: verify_avx512bw_$(COMPILER)
 verify_avx512vbmi: verify_avx512vbmi_$(COMPILER)
+verify_avx512vpopcnt: verify_avx512vpopcnt_$(COMPILER)
 verify_arm: verify_arm_$(COMPILER)
 verify_aarch64: verify_aarch64_$(COMPILER)
 
@@ -186,6 +195,9 @@ run_verify_avx512bw: verify_avx512bw_$(COMPILER)
 	./$^
 
 run_verify_avx512vbmi: verify_avx512vbmi_$(COMPILER)
+	./$^
+
+run_verify_avx512vpopcnt: verify_avx512vpopcnt_$(COMPILER)
 	./$^
 
 run_verify_arm: verify_arm_$(COMPILER)
