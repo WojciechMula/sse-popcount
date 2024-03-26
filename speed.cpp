@@ -293,7 +293,7 @@ Application::Result Application::run(const std::string& name, FN function, doubl
     Result result;
 
     if (cmd.print_csv) {
-        printf("%s, %llu, %llu, ", name.c_str(), cmd.size, cmd.iteration_count);
+        printf("%s, %zu, %zu, ", name.c_str(), cmd.size, cmd.iteration_count);
         fflush(stdout);
     } else {
         const auto& dsc = names.get(name);
