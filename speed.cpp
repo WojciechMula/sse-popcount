@@ -1,4 +1,5 @@
 #include <cstring>
+#include <stdlib.h>
 
 #include <set>
 #include <chrono>
@@ -151,21 +152,33 @@ int Application::run() {
     return 0;
 }
 
-#ifndef posix_memalign
-int posix_memalign(void** data, size_t align, size_t size)
-{
-	*data = _aligned_malloc(align, size);
-	return data == nullptr ? 12 : 0;
-}
+void* aligned_alloc_crossplatform(size_t align, size_t size) {
+#ifdef _MSC_VER
+    return _aligned_malloc(size, align);
+#elif defined(__cplusplus) && __cplusplus >= 201703L
+    // C++17 standard compliant compilers (GCC, Clang, and others supporting C++17)
+    // Note: size must be an integral multiple of alignment.
+    if (size % align != 0) {
+        size = ((size / align) + 1) * align; // Adjust size to be a multiple of align
+    }
+    return std::aligned_alloc(align, size);
+#else
+    // Fallback for non-C++17 compilers or different environments
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr, align, size) != 0) {
+        return nullptr;
+    }
+    return ptr;
 #endif
+}
 
 void Application::run_procedures() {
 
-    // GCC parses alignof(), but does not implement it...
-    int result = posix_memalign(reinterpret_cast<void**>(&data), 64, cmd.size);
-    if (result) {
-        throw Error(std::string("posix_memalign failed: ") + strerror(result));
+    data = reinterpret_cast<std::uint8_t*>(aligned_alloc_crossplatform(64, cmd.size));
+    if (!data) {
+        throw std::bad_alloc();
     }
+
 
     for (size_t i=0; i < cmd.size; i++) {
         data[i] = i;
