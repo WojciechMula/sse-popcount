@@ -46,3 +46,6 @@
 #   include "popcnt-aarch64.cpp"
 #endif
 
+#if defined(HAVE_RVV_INSTRUCTIONS)
+#   include "popcnt-rvv.cpp"
+#endif

@@ -256,6 +256,12 @@ void FunctionRegistry::build() {
         "ARMv8 Neon using CNT",
         popcnt_aarch64_cnt);
 #endif
+
+#if defined(HAVE_RVV_INSTRUCTIONS)
+    add("rvv-1",
+        "RVV generic implementation",
+        popcnt_rvv_lookup);
+#endif
 // definition end
 }
 

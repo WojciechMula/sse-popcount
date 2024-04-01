@@ -10,7 +10,8 @@
         speed_avx512vbmi verify_avx512vbmi \
         speed_avx512vpopcnt verify_avx512vpopcnt \
         speed_arm verify_arm \
-        speed_aarch64 verify_aarch64
+        speed_aarch64 verify_aarch64 \
+        speed_rvv verify_rvv
 
 COMPILER=$(notdir $(CXX))
 FLAGS=-std=c++17 -O2 -Wall -pedantic -Wextra -Wfatal-errors
@@ -18,6 +19,9 @@ FLAGS_INTEL=$(FLAGS) -mpopcnt -fabi-version=6
 FLAGS_ARM=$(FLAGS) -mfpu=neon -DHAVE_NEON_INSTRUCTIONS
 # It seems that for AArch64 no extra flags are needed (NEON is always available)
 FLAGS_AARCH64=$(FLAGS) -DHAVE_NEON_INSTRUCTIONS -DHAVE_AARCH64_ARCHITECTURE
+
+# note: static is needed by Spike emulator
+FLAGS_RVV=$(FLAGS) -march=rv64gcv -DHAVE_RVV_INSTRUCTIONS -static
 
 FLAGS_SSE=$(FLAGS_INTEL) -mssse3 -DHAVE_SSE_INSTRUCTIONS
 FLAGS_AVX=$(FLAGS_INTEL) -mavx -DHAVE_AVX_INSTRUCTIONS
@@ -35,7 +39,8 @@ ALL_AVX512VBMI=speed_avx512vbmi_$(COMPILER) verify_avx512vbmi_$(COMPILER)
 ALL_AVX512VPOPCNT=speed_avx512vpopcnt_$(COMPILER) verify_avx512vpopcnt_$(COMPILER)
 ALL_ARM=speed_arm_$(COMPILER) verify_arm_$(COMPILER)
 ALL_AARCH64=speed_aarch64_$(COMPILER) verify_aarch64_$(COMPILER)
-ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512) $(ALL_AVX512BW) $(ALL_AVX512VPOPCNT)
+ALL_RVV=speed_rvv_$(COMPILER) verify_rvv_$(COMPILER)
+ALL_TARGETS=$(ALL) $(ALL_AVX) $(ALL_AVX2) $(ALL_AVX512) $(ALL_AVX512BW) $(ALL_AVX512VPOPCNT) $(ALL_RVV)
 
 all: $(ALL)
 
@@ -69,6 +74,9 @@ help:
 	@echo "arm                   - makes programs verify_arm & speed_arm (using Neon instructions)"
 	@echo "run_arm               - runs benchmark program"
 	@echo "run_verify_arm        - runs verification program"
+	@echo
+	@echo "RVV target:"
+	@echo "run_verify_rvv        - runs verification program"
 
 x86: $(ALL)
 
@@ -134,6 +142,12 @@ speed_aarch64_$(COMPILER): $(DEPS) speed.cpp
 verify_aarch64_$(COMPILER): $(DEPS) verify.cpp
 	$(CXX) $(FLAGS_AARCH64) verify.cpp -o $@
 
+speed_rvv_$(COMPILER): $(DEPS) speed.cpp
+	$(CXX) $(FLAGS_RVV) speed.cpp -o $@
+
+verify_rvv_$(COMPILER): $(DEPS) verify.cpp
+	$(CXX) $(FLAGS_RVV) verify.cpp -o $@
+
 speed: speed_$(COMPILER)
 speed_avx: speed_avx_$(COMPILER)
 speed_avx2: speed_avx2_$(COMPILER)
@@ -142,6 +156,7 @@ speed_avx512vbmi: speed_avx512vbmi_$(COMPILER)
 speed_avx512vpopcnt: speed_avx512vpopcnt_$(COMPILER)
 speed_arm: speed_arm_$(COMPILER)
 speed_aarch64: speed_aarch64_$(COMPILER)
+speed_rvv: speed_rvv_$(COMPILER)
 
 verify: verify_$(COMPILER)
 verify_avx: verify_avx_$(COMPILER)
@@ -151,7 +166,7 @@ verify_avx512vbmi: verify_avx512vbmi_$(COMPILER)
 verify_avx512vpopcnt: verify_avx512vpopcnt_$(COMPILER)
 verify_arm: verify_arm_$(COMPILER)
 verify_aarch64: verify_aarch64_$(COMPILER)
-
+verify_rvv: verify_rvv_$(COMPILER)
 
 build-all: $(ALL_TARGETS)
 
@@ -202,6 +217,20 @@ run_verify_avx512vpopcnt: verify_avx512vpopcnt_$(COMPILER)
 
 run_verify_arm: verify_arm_$(COMPILER)
 	./$^
+
+SPIKE_ISA=rv64gcv_Zicntr
+
+run_verify_rvv: verify_rvv_$(COMPILER)
+	# test for VLENB=16
+	spike --isa=$(SPIKE_ISA) `which pk` $^
+	# test for VLENB=128
+	spike --isa=$(SPIKE_ISA) --varch=vlen:512,elen:64 `which pk` $^
+
+run_speed_rvv: speed_rvv_$(COMPILER)
+	# test for VLENB=16
+	spike --isa=$(SPIKE_ISA) `which pk` $^ $(SIZE) $(ITERS)
+	# test for VLENB=128
+	spike --isa=$(SPIKE_ISA) --varch=vlen:512,elen:64 `which pk` $^ $(SIZE) $(ITERS)
 
 clean:
 	rm -f $(ALL_TARGETS) $(ALL_ARM)

@@ -265,6 +265,10 @@ void Application::run_procedure(const std::string& name) {
     RUN("aarch64-cnt", popcnt_aarch64_cnt);
 #endif
 
+#if defined(HAVE_RVV_INSTRUCTIONS)
+    RUN("rvv-1", popcnt_rvv_lookup);
+#endif
+
 #define RUN_BUILTIN(function_name, function) \
     { \
         auto wrapper = [](const uint8_t* data, size_t size) { \

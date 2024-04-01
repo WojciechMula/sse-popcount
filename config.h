@@ -23,16 +23,19 @@
 #   endif
 #endif
 
-#if !defined(HAVE_NEON_INSTRUCTIONS)
+#if !defined(HAVE_NEON_INSTRUCTIONS) && !defined(HAVE_RVV_INSTRUCTIONS)
 #   define HAVE_POPCNT_INSTRUCTION 1
 #endif
 
 #if defined(HAVE_NEON_INSTRUCTIONS)
 #   include <arm_neon.h>
+#elif defined(HAVE_RVV_INSTRUCTIONS)
+#   ifdef __riscv_v_intrinsic
+#       include <riscv_vector.h>
+#   endif
 #else
 #   include <immintrin.h>
 #   include <x86intrin.h>
 #endif
 
 #define FORCE_INLINE inline __attribute__((always_inline))
-
